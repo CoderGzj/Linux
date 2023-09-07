@@ -9,3 +9,4 @@ Linux由林纳斯 托瓦兹发明。
 ### 1.2 Linux、Windows区别
 |比较|Windows|Linux|
 |收费|收费且贵|免费或少许收费|
+|软件与支持|
