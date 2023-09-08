@@ -26,25 +26,27 @@ Linux发行版本
 ### 3.1 Linux文件
 Linux系统中一切皆文件
 ### 3.2 Linux目录结构
-/bin
+* /bin
 Binary缩写，存放着最经常使用的指令
-/home
+* /home
 存放普通用户的主目录，在Linux中每个用户都有一个自己的目录，一般以用户账号命名
-/root
+* /root
 系统管理员，超级权限者用户主目录
-/etc
+* /etc
 所有系统管理所需的配置文件和子目录
-/usr
+* /usr
 重要，用户许多程序文件在此
-/boot
+* /boot
 存放启动Linux时使用的核心文件
-/media
+* /media
 设备
-/mnt
+* /mnt
 临时挂载
-/opt
+* /opt
 额外安装软件所摆放的目录
-/var
+* /var
 不断扩充的东西，经常修改的目录
 
 ## 4 VI / VIM 编辑器
+### 4.1 VI / VIM
+Unix操作系统和类Unix操作系统中最通用的文本编辑器
