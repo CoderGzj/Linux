@@ -129,4 +129,5 @@ systemctl get-default
 >-r	相当于 reboot 重启
 >now 立刻关机
 >时间 等待多久后关机（单位分钟）
->
+
+## 7
