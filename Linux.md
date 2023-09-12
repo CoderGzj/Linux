@@ -130,4 +130,18 @@ systemctl get-default
 >now 立刻关机
 >时间 等待多久后关机（单位分钟）
 
-## 7
+## 7 常用基本命令
+### 7.1 帮助命令
+- man 获得帮助信息
+```
+[root@curry ~]# man ls
+```
+- help 获得 shell 内置命令的帮助信息
+help 命令
+```
+[root@curry ~]# help cd
+```
+
+
+
+### 7.2 
