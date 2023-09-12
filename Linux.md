@@ -141,7 +141,10 @@ help 命令
 ```
 [root@curry ~]# help cd
 ```
-
-
-
-### 7.2 
+### 7.2 文件目录类
+- pwd 显示当前工作目录的绝对路径
+pwd:print working directory 打印工作目录
+```
+[root@curry ~]# pwd
+/root
+```
