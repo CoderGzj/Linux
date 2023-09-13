@@ -155,17 +155,54 @@ systemctl get-default
 ### 7.1 帮助命令
 - man 获得帮助信息
 ```
+查看ls命令的帮助信息
 [root@curry ~]# man ls
 ```
 - help 获得 shell 内置命令的帮助信息
 help 命令
 ```
+查看cd命令的帮助信息
 [root@curry ~]# help cd
 ```
+- 常用快捷键
+ctr + c 停止进程
 ### 7.2 文件目录类
 - pwd 显示当前工作目录的绝对路径
 pwd:print working directory 打印工作目录
 ```
+显示当前工作目录的绝对路径
 [root@curry ~]# pwd
 /root
+```
+- ls 列出目录的内容
+ls:list 列出目录内容
+ls [选项] [目录或是文件]
+
+选项说明：
+-a 全部文件，包括隐藏档（.开头的文件）一起列出来
+-l 长数据列出，包括文件属性、权限等数据
+
+```
+查看当前目录的所有内容信息
+[root@curry ~]# ls -al
+```
+- cd 切换目录
+cd:Change Directory 切换路径
+
+参数说明
+cd 绝对路径		切换路径
+cd 相对路径		切换路径
+cd ~或者cd 	    回到自己的家目录
+cd - 		       回到上一次所在目录
+cd .. 		        回到当前目录的上一级目录
+cd -P 		      跳转到实际物理路径，而非快捷方式路径
+
+- mkdir 创建一个新的目录
+mkdir:Make directory 建立目录
+选项说明
+> -p 创建多层目录
+
+```
+创建一个多级目录
+[root@curry ~]# mkdir -p xiyou/dssz/meihouwang
 ```
