@@ -396,8 +396,10 @@ curry ALL=(ALL) ALL
 usermod -g 用户组  用户名
 
 ### 用户组管理命令
+每个用户都有一个用户组，系统可以对一个用户组中的所有用户进行集中管理。
 
-
+- groupadd 新增组
+groupadd 组名
 
 
 
