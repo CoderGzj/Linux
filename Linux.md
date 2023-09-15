@@ -395,13 +395,51 @@ curry ALL=(ALL) ALL
 - usermod 修改用户
 usermod -g 用户组  用户名
 
-### 用户组管理命令
+### 7.5 用户组管理命令
 每个用户都有一个用户组，系统可以对一个用户组中的所有用户进行集中管理。
 
 - groupadd 新增组
 groupadd 组名
+```
+添加一个xitianqujing组
+[root@curry opt]#groupadd xitianqujing
+```
 
+- groupdel 删除组
+groupdel 组名
+```
+删除xitianqujing组
+[root@curry opt]# groupdel xitianqujing
+```
 
+- groupmod 修改组
+groupmod -n 新组名  老组名
+
+- cat /etc/group 查看创建了哪些组
+
+### 7.6 文件权限类
+- 文件属性
+（1）0 首位表示类型
+在Linux中第一个字符代表这个文件是目录、文件或链接文件等等
+-代表文件
+d 代表目录
+l 链接文档(link file)；
+（2）第1-3位确定属主（该文件的所有者）拥有该文件的权限。---User
+（3）第4-6位确定属组（所有者的同组用户）拥有该文件的权限，---Group
+（4）第7-9位确定其他用户拥有该文件的权限---Other
+
+- chmod 改变权限
+第一种方式变更权限
+chmod [{ugoa}{+-=}{rwx}] 文件或目录
+```
+[root@curry ~]# chmod u+x houge.txt
+```
+
+第二种方式变更权限
+chmod [mode=421 ] [文件或目录]
+```
+[root@curry ~]# chmod 777 houge.txt
+```
 
 
 # 编译
