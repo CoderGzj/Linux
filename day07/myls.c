@@ -39,7 +39,6 @@ int main(int argc, char *argv[]) {
             res = '?';                
             break;
         }
-
         printf("%c%6o %ld %s %s %8ld %d月 %d %2d:%2d %s\n",
         res,
         statbuf.st_mode,

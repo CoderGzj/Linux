@@ -8,11 +8,15 @@
 
 ---
 
+<<<<<<< HEAD
 # Linux入门
+=======
+# Linux系统入门
+>>>>>>> 81fc0dd65d1584ed78cdf54f6ff4569626fb0169
 
 ## 1 Linux入门 
 ### 1.1 概述
-Linux由林纳斯 托瓦兹发明。
+Linux由林纳斯.托瓦兹发明。
 是一套免费试用和自由传播的类**Unix**操作系统。
 知名发行版：Ubantu、RedHat、CenOS、Debian、SuSE
 ### 1.2 Linux、Windows区别
