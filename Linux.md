@@ -1,23 +1,17 @@
 # Linux 学习
-第一阶段：linux 基本操作命令（文件操作命令、编辑工具使用，linux 用户管理）
-第二阶段：linux 各种配置（环境变量配置、网络配置、服务配置）
-第三阶段：linux 下搭建对应语言开发环境
-第四阶段：编写 shell 脚本，对 Linux 服务器进行维护
-第五阶段：进行安全设置，防止攻击，保障服务器正常进行，能对系统调优
+第一阶段：linux 基本操作命令（文件操作命令、编辑工具使用，linux 用户管理）  
+第二阶段：linux 各种配置（环境变量配置、网络配置、服务配置）  
+第三阶段：linux 下搭建对应语言开发环境  
+第四阶段：编写 shell 脚本，对 Linux 服务器进行维护  
+第五阶段：进行安全设置，防止攻击，保障服务器正常进行，能对系统调优  
 第六阶段：深入理解 Linux 系统（内核），熟练掌握大型网站应用架构组成、熟悉各个环节的部署和维护方法
 
 ---
-
-<<<<<<< HEAD
 # Linux入门
-=======
-# Linux系统入门
->>>>>>> 81fc0dd65d1584ed78cdf54f6ff4569626fb0169
 
 ## 1 Linux入门 
 ### 1.1 概述
-Linux由林纳斯.托瓦兹发明。
-是一套免费试用和自由传播的类**Unix**操作系统。
+Linux由林纳斯.托瓦兹发明。是一套免费试用和自由传播的类**Unix**操作系统。   
 知名发行版：Ubantu、RedHat、CenOS、Debian、SuSE
 ### 1.2 Linux、Windows区别
 |比较|Windows|Linux|
@@ -31,17 +25,17 @@ Linux由林纳斯.托瓦兹发明。
 
 ---
 
-## 2 VM、Linux安装
+## 2 VM、Linux
 ### 2.1 VMware
-在物理机上创建虚拟机软件
+在物理机上创建虚拟机的软件
 ### 2.2 CentOS
-Linux发行版本
+Linux一个发行版本
 
 ---
 
 ## 3 Linux文件与目录结构
 ### 3.1 Linux文件
-Linux系统中一切皆文件
+Linux系统中“一切皆文件”
 ### 3.2 Linux目录结构
 * /bin
 Binary缩写，存放着最经常使用的指令
@@ -126,57 +120,57 @@ Unix操作系统和类Unix操作系统中最通用的文本编辑器
 
 ## 6 系统管理
 ### 6.1 Linux中进程和服务
-计算机中，一个正在执行的程序或命令，被叫做“进程”（process）。
+计算机中，一个正在执行的程序或命令，被叫做“进程”（process）。  
 启动之后一只存在、常驻内存的进程，一般被称作“服务”（service）。
 
-CentOS 7 版本
-systemctl
-基本语法
-systemctl  start | stop | restart | status  服务名
-查看服务
+CentOS 7 版本  
+systemctl  
+基本语法  
+systemctl  start | stop | restart | status  服务名  
+查看服务  
 /user/lib/systemd/system
 ### 6.2 系统运行级别
-CentOS 7 运行级别简化：
-multi-user.target 等价于原运行级别3（多用户有网，无图形界面）
-graphical.target 等价于原运行级别5（多用户有网，有图形界面）
+CentOS 7 运行级别简化：  
+multi-user.target 等价于原运行级别3（多用户有网，无图形界面）  
+graphical.target 等价于原运行级别5（多用户有网，有图形界面）  
 
-查看当前运行级别:
+查看当前运行级别:  
 systemctl get-default
 ### 关机重启命令
-1 sync       （功能描述：将数据由内存同步到硬盘中）
-2 halt         （功能描述：停机，关闭系统，但不断电）
-3 poweroff （功能描述：关机，断电）
-4 reboot     （功能描述：就是重启，等同于shutdown -r now）
+1 sync       （功能描述：将数据由内存同步到硬盘中）  
+2 halt         （功能描述：停机，关闭系统，但不断电）  
+3 poweroff （功能描述：关机，断电）  
+4 reboot     （功能描述：就是重启，等同于shutdown -r now）  
 5 shutdown [选项] 时间
->-H 相当于 halt 停机
->-r	相当于 reboot 重启
->now 立刻关机
->时间 等待多久后关机（单位分钟）
+> -H    相当于 halt 停机
+> -r	相当于 reboot 重启
+> now   立刻关机
+> 时间  等待多久后关机（单位分钟）
 
 ---
 
 ## 7 常用基本命令
 ### 7.1 帮助命令
-- man 获得帮助信息
+- man 获得帮助信息  
 man [命令或配置文件]
 ```
 查看ls命令的帮助信息
 [root@curry ~]# man ls
 ```
 
-- help 获得 shell 内置命令的帮助信息
+- help 获得 shell 内置命令的帮助信息  
 help 命令
 ```
 查看cd命令的帮助信息
 [root@curry ~]# help cd
 ```
 
-- 常用快捷键
+- 常用快捷键  
 ctr + c 停止进程
 
 ### 7.2 文件目录类
 - pwd 显示当前工作目录的绝对路径
-pwd:print working directory 打印工作目录
+pwd: print working directory 打印工作目录
 ```
 显示当前工作目录的绝对路径
 [root@curry ~]# pwd
@@ -198,13 +192,13 @@ ls [选项] [目录或是文件]
 - cd 切换目录
 cd:Change Directory 切换路径
 cd [参数]
->参数说明：
-cd 绝对路径	 切换路径
-cd 相对路径     切换路径
-cd ~或者cd 	 回到自己的家目录
-cd - 		         回到上一次所在目录
-cd .. 		        回到当前目录的上一级目录
-cd -P 		      跳转到实际物理路径，而非快捷方式路径
+> 参数说明：
+> cd 绝对路径	 切换路径
+> cd 相对路径    切换路径
+> cd ~或者cd 	回到自己的家目录
+> cd - 		    回到上一次所在目录
+> cd .. 		回到当前目录的上一级目录
+> cd -P 		跳转到实际物理路径，而非快捷方式路径
 
 - mkdir 创建一个新的目录
 mkdir:Make directory 建立目录
@@ -219,7 +213,7 @@ mkdir [选项] 要创建的目录
 
 - rmdir 删除一个空的目录
 rmdir:Remove directory 移除目录
-rmdir 要删除的空目录
+rmdir 要删除的**空目录**
 ```
 删除一个空的文件夹
 [root@curry ~]# rmdir xiyou/dssz/meihouwang
@@ -249,6 +243,7 @@ rm [选项] deleteFile
 > -f 强制执行删除操作，不提示确认
 > -v 显示指令的详细执行过程
 
+**不要随便使用 rm -rf /**
 ```
 递归删除目录中所有内容
 [root@curry ~]# rm -rf dssz/
@@ -256,7 +251,6 @@ rm [选项] deleteFile
 - mv 移动文件与目录或重命名
 （1）mv oldNameFile newNameFile （功能描述：重命名）
 （2）mv /temp/movefile /targetFolder （功能描述：移动文件）
-
 - cat 查看文件内容
 cat [选项] 要查看的文件
 > 选项说明
@@ -292,8 +286,7 @@ echo [选项] [输出内容]
 > -e	支持反斜线控制的字符转换
 
 - head 显示文件头部内容
-默认情况下head 指令显示文件的前10 行内容。
-head 文件（功能描述：查看文件头10行内容）
+head 文件（功能描述：默认情况查看文件头10行内容）
 head -n <数字> 文件（功能描述：查看文件头<数字>行内容）
 ```
 查看文件的头2行
@@ -328,7 +321,7 @@ history （功能描述：查看已经执行过历史命令）
 ### 7.3 时间日期类
 date [OPTION]... [+FORMAT]
 > 选项说明
-> -d<时间字符串>		显示指定的时间字符串表示的时间，而非当前时间
+> -d<时间字符串>	显示指定的时间字符串表示的时间，而非当前时间
 > -s<日期时间>		设置系统日期时间
 
 - date 显示当前时间
@@ -346,7 +339,7 @@ date [OPTION]... [+FORMAT]
 date -s 字符串时间
 ```
 设置系统当前时间
-[root@hadoop101 ~]# date -s "2017-06-19 20:52:18"
+[root@hadoop101 ~]# date -s "2023-08-19 20:52:18"
 ```
 
 - cal 查看日历
@@ -354,41 +347,41 @@ cal [选项] （功能描述：不加选项，显示本月日历）
 > 选项： 具体某一年		显示这一年的日历
 
 ### 7.4 用户管理命令
-- useradd 添加新用户
+- useradd ：添加新用户
 useradd 用户名		（功能描述：添加新用户）
 useradd -g 组名用户名（功能描述：添加新用户到某个组）
 
-- passwd 设置用户密码
+- passwd ：设置用户密码
 passwd 用户名（功能描述：设置用户密码）
 ```
 设置用户的密码
 [root@curry ~]# passwd tangseng
 ```
 
-- id 查看用户是否存在
+- id ：查看用户是否存在
 id 用户名
 ```
 查看用户是否存在
 [root@curry ~]#id tangseng
 ```
 
-- cat /etc/passwd 查看创建了哪些用户
-- cat /etc/shadow 查看口令信息
+- cat /etc/passwd ：查看创建了哪些用户
+- cat /etc/shadow ：查看口令信息
 
-- su 切换用户
+- su ：切换用户
 su: swith user 切换用户
 su 用户名称（功能描述：切换用户，只能获得用户的执行权限，不能获得环境变量）
 su - 用户名称（功能描述：切换到用户并获得该用户的环境变量及执行权限）
 
-- userdel 删除用户
+- userdel ：删除用户
 userdel 用户名	（功能描述：删除用户但保存用户主目录）
 userdel -r 用户名（功能描述：用户和用户主目录，都删除）
 
-- who 查看登录用户信息
+- who ：查看登录用户信息
 whoami （功能描述：显示自身用户名称）
 who am i （功能描述：显示登录用户的用户名以及登陆时间）
 
-- sudo 设置普通用户具有root 权限
+- sudo ：设置普通用户具有root 权限
 修改配置文件	/etc/sudoers
 ```
 ## Allow root to run any commands anywhere
@@ -396,43 +389,43 @@ root ALL=(ALL) ALL
 curry ALL=(ALL) ALL
 ```
 
-- usermod 修改用户
+- usermod ：修改用户
 usermod -g 用户组  用户名
 
 ### 7.5 用户组管理命令
 每个用户都有一个用户组，系统可以对一个用户组中的所有用户进行集中管理。
 
-- groupadd 新增组
+- groupadd ：新增组
 groupadd 组名
 ```
 添加一个xitianqujing组
 [root@curry opt]#groupadd xitianqujing
 ```
 
-- groupdel 删除组
+- groupdel ：删除组
 groupdel 组名
 ```
 删除xitianqujing组
 [root@curry opt]# groupdel xitianqujing
 ```
 
-- groupmod 修改组
+- groupmod ：修改组
 groupmod -n 新组名  老组名
 
-- cat /etc/group 查看创建了哪些组
+- cat /etc/group ：查看创建了哪些组
 
 ### 7.6 文件权限类
 - 文件属性
-（1）0 首位表示类型
+1）0 首位表示类型
 在Linux中第一个字符代表这个文件是目录、文件或链接文件等等
--代表文件
-d 代表目录
-l 链接文档(link file)；
-（2）第1-3位确定属主（该文件的所有者）拥有该文件的权限。---User
-（3）第4-6位确定属组（所有者的同组用户）拥有该文件的权限，---Group
-（4）第7-9位确定其他用户拥有该文件的权限---Other
+\-  代表文件
+d   代表目录
+l   链接文档(link file)；
+2）第1-3位确定属主（该文件的所有者）拥有该文件的权限。---User
+3）第4-6位确定属组（所有者的同组用户）拥有该文件的权限，---Group
+4）第7-9位确定其他用户拥有该文件的权限---Other
 
-- chmod 改变权限
+- chmod :改变权限
 第一种方式变更权限
 chmod [{ugoa}{+-=}{rwx}] 文件或目录
 ```
@@ -440,46 +433,46 @@ chmod [{ugoa}{+-=}{rwx}] 文件或目录
 ```
 
 第二种方式变更权限
-chmod [mode=421 ] [文件或目录]
+chmod [mode=421] [文件或目录]
 ```
 [root@curry ~]# chmod 777 houge.txt
 ```
 
-- chown 改变所有者
+- chown :改变所有者
 chown [选项] [最终用户] [文件或目录] 
 > 选项说明
 > -R	递归
 
-- chgrp 改变所属组
+- chgrp :改变所属组
 chgrp [最终用户组] [文件或目录]
 
 ### 7.7 搜索查找类
-- find 查找文件或者目录
+- find :查找文件或者目录
 find [搜索范围] [选项]
 > 选项说明
 > -name<查询方式>	按照指定的文件名查找模式查找文件
 > -user<用户名>	查找属于指定用户名所有文件
 > -size<文件大小> 	按照指定的文件大小查找文件
 
-- locate 快速定位文件路径
+- locate :快速定位文件路径
 locate 搜索文件
 由于locate 指令基于数据库进行查询，所以第一次运行前，必须使用updatedb 指令创建locate 数据库。
 
-- grep 过滤查找及“|”管道符
+- grep :过滤查找及“|”管道符
 管道符，“|”，表示将前一个命令的处理结果输出传递给后面的命令处理
 grep 选项 	查找内容源文件
 
 ### 7.8 压缩和解压类
-- gzip/gunzip 压缩
+- gzip/gunzip :压缩
 gzip 文件		（功能描述：压缩文件，只能将文件压缩为\*.gz 文件）
 gunzip 文件.gz （功能描述：解压缩文件命令）
 
 经验技巧
-（1）只能压缩文件不能压缩目录
-（2）不保留原来的文件
-（3）同时多个文件会产生多个压缩包
+1）只能压缩文件不能压缩目录
+2）不保留原来的文件
+3）同时多个文件会产生多个压缩包
 
-- zip/unzip 压缩
+- zip/unzip :压缩
 zip [选项] XXX.zip 将要压缩的内容	压缩文件和目录的命令
 unzip [选项] XXX.zip				解压缩文件
 > 选项说明
