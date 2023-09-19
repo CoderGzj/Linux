@@ -1,5 +1,8 @@
 {
     "files.associations": {
         "myself.h": "c"
-    }
+    },
+    "pasteImage.basePath": "${currentFileDir}",
+    "pasteImage.path": "${currentFileDir}/img",
+    "pasteImage.defaultName": "Y-MM-DD-HH-mm-ss"
 }
