@@ -14,15 +14,15 @@ int main(int argc, char *argv[]) {
         select(fdr+1,&rdset,NULL,NULL,NULL);
         if(FD_ISSET(fdr,&rdset)) {
             puts("msg from pipe");
-            memset(buf,0,sizeof(buf));//清空
-            read(fdr,buf,sizeof(buf));//从管道fdr读
+            memset(buf,0,sizeof(buf));// 清空
+            read(fdr,buf,sizeof(buf));// 从管道fdr读
             puts(buf);
         }
         if(FD_ISSET(STDIN_FILENO,&rdset)) {
             puts("msg from stdin");
             memset(buf,0,sizeof(buf));//清空
             read(STDIN_FILENO,buf,sizeof(buf));
-            write(fdw,buf,strlen(buf));//向管道fdw写，有多少写多少
+            write(fdw,buf,strlen(buf));// 向管道fdw写，有多少写多少
         }
     }
 }
