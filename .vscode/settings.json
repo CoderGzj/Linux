@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "myself.h": "c"
+        "myself.h": "c",
+        "stdlib.h": "c",
+        "select.h": "c"
     }
 }
