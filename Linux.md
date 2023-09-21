@@ -1,20 +1,9 @@
-# Linux 学习
-第一阶段：linux 基本操作命令（文件操作命令、编辑工具使用，linux 用户管理）  
-第二阶段：linux 各种配置（环境变量配置、网络配置、服务配置）  
-第三阶段：linux 下搭建对应语言开发环境  
-第四阶段：编写 shell 脚本，对 Linux 服务器进行维护  
-第五阶段：进行安全设置，防止攻击，保障服务器正常进行，能对系统调优  
-第六阶段：深入理解 Linux 系统（内核），熟练掌握大型网站应用架构组成、熟悉各个环节的部署和维护方法
-
----
-
-# Linux入门
-
-## 1 Linux入门 
-### 1.1 概述
+# 1 Linux入门 
+## 1.1 概述
 Linux由林纳斯.托瓦兹发明。是一套免费试用和自由传播的类**Unix**操作系统。   
 知名发行版：Ubantu、RedHat、CenOS、Debian、SuSE
-### 1.2 Linux、Windows区别
+
+## 1.2 Linux、Windows区别
 |比较|Windows|Linux|
 |:---:|:---:|:---:|
 |收费|收费且贵|免费或少许收费|
@@ -61,53 +50,6 @@ Binary缩写，存放着最经常使用的指令
 
 ---
 
-## 4 VI / VIM 编辑器
-### 4.1 VI / VIM
-Unix操作系统和类Unix操作系统中最通用的文本编辑器
-### 4.2 一般模式
-以vi打开就直接进入一般模式（默认模式）。主要是复制粘贴和删除
-|语法|功能|
-|:---:|:---:|
-|yy|复制光标当前行|
-|y数字y|复制一段|
-|p|粘贴到箭头目的行|
-|u|撤消上一步|
-|dd|删除光标当前行|
-|d数字d|删除光标及后n行|
-|x|剪切一个字母，相当于delete|
-|X|剪切一个字母，相当于Backspace|
-|yw|复制一个词|
-|dw|删除一个词|
-|^|移动到行头|
-|$|移动到行尾|
-|1+G|移动到页头，数字|
-|G|移动到页尾|
-|数字+G|移动到目标行|
-### 4.3 编辑模式
-一般模式 -> 编辑模式，按以下按键进入。
-|按键|功能|
-|:---:|:---:|
-|i|当前光标前|
-|a|当前光标后|
-|o|当前光标下一行|
-|I|光标所在行最前|
-|A|光标所在行最后|
-|O|当前光标上一行|
-编辑模式 -> 一般模式，按ESC退出到一般模式。
-### 4.4 指令模式
-一般模式 -> 指令模式，按以下按键进入。
-|命令|功能|
-|:---:|:---:|
-|:w|保存|
-|:q|退出|
-|:!|强制执行|
-|/要查找的词|n往下找，N往上找|
-|:noh|取消高亮|
-|:set nu|显示行号|
-|:set nonu|关闭行号|
-|:%s/old/new/g|替换内容 /g替换匹配到的所有内容|
-
----
 
 ## 5 网络配置
 - ifconfig 
@@ -150,503 +92,7 @@ systemctl get-default
 
 ---
 
-## 7 常用基本命令
-### 7.1 帮助命令
-#### man ：获得帮助信息  
-man [命令或配置文件]
-```
-查看ls命令的帮助信息
-[root@curry ~]# man ls
-```
 
-#### help ：获得 shell 内置命令的帮助信息  
-help 命令
-```
-查看cd命令的帮助信息
-[root@curry ~]# help cd
-```
-
-#### 常用快捷键  
-ctr + c 停止进程
-
-### 7.2 文件目录类
-#### pwd ：显示当前工作目录的绝对路径
-pwd: print working directory 打印工作目录
-```
-显示当前工作目录的绝对路径
-[root@curry ~]# pwd
-/root
-```
-
-#### ls ：列出目录的内容
-ls:list 列出目录内容
-ls [选项] [目录或是文件]
-> 选项说明：
-> -a 全部文件，包括隐藏档（.开头的文件）一起列出来
-> -l 长数据列出，包括文件属性、权限等数据
-
-```
-查看当前目录的所有内容信息
-[root@curry ~]# ls -al(简写 ll)
-```
-
-#### cd ：切换目录
-cd:Change Directory 切换路径
-cd [参数]
-> 参数说明：
-> cd 绝对路径	 切换路径
-> cd 相对路径    切换路径
-> cd ~或者cd 	回到自己的家目录
-> cd - 		    回到上一次所在目录
-> cd .. 		回到当前目录的上一级目录
-> cd -P 		跳转到实际物理路径，而非快捷方式路径
-
-#### mkdir ：创建一个新的目录
-mkdir:Make directory 建立目录
-mkdir [选项] 要创建的目录
-> 选项说明 ：
--p 创建多层目录
-
-```
-创建一个多级目录
-[root@curry ~]# mkdir -p xiyou/dssz/meihouwang
-```
-
-#### rmdir ：删除一个空的目录
-rmdir:Remove directory 移除目录
-rmdir 要删除的**空目录**
-```
-删除一个空的文件夹
-[root@curry ~]# rmdir xiyou/dssz/meihouwang
-```
-
-#### touch ：创建空文件
-touch 文件名称
-```
-[root@curry ~]# touch xiyou/dssz/sunwukong.txt
-```
-
-#### cp ：复制文件或目录
-cp [选项] source dest
-> 选项说明
-> -r 递归复制整个文件夹
-
-强制覆盖不提示的方法：\cp
-```
-递归复制整个文件夹
-[root@curry ~]# cp -r xiyou/dssz/ ./
-```
-
-#### rm ：删除文件或目录
-rm [选项] deleteFile
-> 选项说明
-> -r 递归删除目录所有内容
-> -f 强制执行删除操作，不提示确认
-> -v 显示指令的详细执行过程
-
-**不要随便使用 rm -rf /**
-```
-递归删除目录中所有内容
-[root@curry ~]# rm -rf dssz/
-```
-#### mv ：移动文件与目录或重命名
-（1）mv oldNameFile newNameFile （功能描述：重命名）
-（2）mv /temp/movefile /targetFolder （功能描述：移动文件）
-#### cat ：查看文件内容
-cat [选项] 要查看的文件
-> 选项说明
-> -n 显示所有行的行号，包括空行。
-
-一般查看比较小的文件，一屏幕能显示全的。
-```
-查看文件内容并显示行号
-[root@curry ~]# cat -n houge.txt
-```
-
-#### more ：文件内容分屏查看器
-more 要查看的文件
-> 选项说明
-> space空格键	向下翻一页
-> enter 回车键    向下翻一行
-> q			  退出
-> Ctrl+F	    向下滚动一屏
-> Ctrl+B 	    返回上一屏
-
-#### less ：分屏显示文件内容
-less 要查看的文件
-> 选项说明
-> space空格键	向下翻一页
-> pagedown	   向下翻一页
-> pageup    	向上翻一页
-> / 字串		   向下搜寻字串		
-> q			  退出
-
-#### echo ：输出内容到控制台
-echo [选项] [输出内容]
-> 选项说明
-> -e	支持反斜线控制的字符转换
-
-#### head ：显示文件头部内容
-head 文件（功能描述：默认情况查看文件头10行内容）
-head -n <数字> 文件（功能描述：查看文件头<数字>行内容）
-```
-查看文件的头2行
-[root@curry ~]# head -n 2 smartd.conf
-```
-
-#### tail ：输出文件尾部内容
-默认情况下tail 指令显示文件的后10 行内容。
-> 选项说明
-> -n <行数>	输出末尾n行内容
-> -f	显示最新追加内容，监视文件变化
-
-#### 输出重定向>和 追加>>
-\> 	覆盖
-\>>	追加
-
-#### ln ：软链接
-软链接也称为符号链接，主要存放链接其他文件的路径。
-ln -s [原文件或目录] [软链接名] （功能描述：给原文件创建一个软链接）
-删除软链接： rm -rf 软链接名，而不是rm -rf 软链接名/
-如果使用rm -rf 软链接名/ 删除，会把软链接对应的真实目录下内容删掉
-```
-创建软连接
-[root@curry ~]# ln -s xiyou/dssz/houge.txt ./houzi
-删除软连接
-[root@curry ~]# rm -rf houzi
-```
-
-#### history ：查看已经执行过历史命令
-history （功能描述：查看已经执行过历史命令）
-
-### 7.3 时间日期类
-date [OPTION]... [+FORMAT]
-> 选项说明
-> -d<时间字符串>	显示指定的时间字符串表示的时间，而非当前时间
-> -s<日期时间>		设置系统日期时间
-
-#### date 显示当前时间
-（1）date 	（功能描述：显示当前时间）
-（2）date +%Y （功能描述：显示当前年份）
-（3）date +%m （功能描述：显示当前月份）
-（4）date +%d （功能描述：显示当前是哪一天）
-（5）date "+%Y-%m-%d %H:%M:%S" （功能描述：显示年月日时分秒）
-
-#### date 显示非当前时间
-（1）date -d '1 days ago' （功能描述：显示前一天时间）
-（2）date -d '-1 days ago' （功能描述：显示明天时间）
-
-#### date 设置系统时间
-date -s 字符串时间
-```
-设置系统当前时间
-[root@hadoop101 ~]# date -s "2023-08-19 20:52:18"
-```
-
-#### cal ：查看日历
-cal [选项] （功能描述：不加选项，显示本月日历）
-> 选项： 具体某一年		显示这一年的日历
-
-### 7.4 用户管理命令
-#### useradd ：添加新用户
-useradd 用户名		（功能描述：添加新用户）
-useradd -g 组名用户名（功能描述：添加新用户到某个组）
-
-#### passwd ：设置用户密码
-passwd 用户名（功能描述：设置用户密码）
-```
-设置用户的密码
-[root@curry ~]# passwd tangseng
-```
-
-#### id ：查看用户是否存在
-id 用户名
-```
-查看用户是否存在
-[root@curry ~]#id tangseng
-```
-
-- cat /etc/passwd ：查看创建了哪些用户
-- cat /etc/shadow ：查看口令信息
-
-#### su ：切换用户
-su: swith user 切换用户
-su 用户名称（功能描述：切换用户，只能获得用户的执行权限，不能获得环境变量）
-su - 用户名称（功能描述：切换到用户并获得该用户的环境变量及执行权限）
-
-#### userdel ：删除用户
-userdel 用户名	（功能描述：删除用户但保存用户主目录）
-userdel -r 用户名（功能描述：用户和用户主目录，都删除）
-
-#### who ：查看登录用户信息
-whoami （功能描述：显示自身用户名称）
-who am i （功能描述：显示登录用户的用户名以及登陆时间）
-
-#### sudo ：设置普通用户具有root 权限
-修改配置文件	/etc/sudoers
-```
-## Allow root to run any commands anywhere
-root ALL=(ALL) ALL
-curry ALL=(ALL) ALL
-```
-
-#### usermod ：修改用户
-usermod -g 用户组  用户名
-
-### 7.5 用户组管理命令
-每个用户都有一个用户组，系统可以对一个用户组中的所有用户进行集中管理。
-
-#### groupadd ：新增组
-groupadd 组名
-```
-添加一个xitianqujing组
-[root@curry opt]#groupadd xitianqujing
-```
-
-#### groupdel ：删除组
-groupdel 组名
-```
-删除xitianqujing组
-[root@curry opt]# groupdel xitianqujing
-```
-
-#### groupmod ：修改组
-groupmod -n 新组名  老组名
-
-#### cat /etc/group ：查看创建了哪些组
-
-### 7.6 文件权限类
-#### 文件属性
-1）0 首位表示类型
-在Linux中第一个字符代表这个文件是目录、文件或链接文件等等
-\-  代表文件
-d   代表目录
-l   链接文档(link file)；
-2）第1-3位确定属主（该文件的所有者）拥有该文件的权限。---User
-3）第4-6位确定属组（所有者的同组用户）拥有该文件的权限，---Group
-4）第7-9位确定其他用户拥有该文件的权限---Other
-
-#### chmod :改变权限
-第一种方式变更权限
-chmod [{ugoa}{+-=}{rwx}] 文件或目录
-```
-[root@curry ~]# chmod u+x houge.txt
-```
-
-第二种方式变更权限
-chmod [mode=421] [文件或目录]
-```
-[root@curry ~]# chmod 777 houge.txt
-```
-
-#### chown ：改变所有者
-chown [选项] [最终用户] [文件或目录] 
-> 选项说明
-> -R	递归
-
-#### chgrp ：改变所属组
-chgrp [最终用户组] [文件或目录]
-
-### 7.7 搜索查找类
-#### find ：查找文件或者目录
-find [搜索范围] [选项]
-> 选项说明
-> -name<查询方式>	按照指定的文件名查找模式查找文件
-> -user<用户名>	查找属于指定用户名所有文件
-> -size<文件大小> 	按照指定的文件大小查找文件
-
-#### locate :快速定位文件路径
-locate ：搜索文件
-由于locate 指令基于数据库进行查询，所以第一次运行前，必须使用updatedb 指令创建locate 数据库。
-
-#### grep ：过滤查找及“|”管道符
-管道符，“|”，表示将前一个命令的处理结果输出传递给后面的命令处理
-grep 选项 	查找内容源文件
-
-### 7.8 压缩和解压类
-#### gzip/gunzip ：压缩
-gzip 文件		（功能描述：压缩文件，只能将文件压缩为\*.gz 文件）
-gunzip 文件.gz （功能描述：解压缩文件命令）
-
-经验技巧
-1）只能压缩文件不能压缩目录
-2）不保留原来的文件
-3）同时多个文件会产生多个压缩包
-
-#### zip/unzip ：压缩
-zip [选项] XXX.zip 将要压缩的内容	压缩文件和目录的命令
-unzip [选项] XXX.zip				解压缩文件
-> 选项说明
-> -r	压缩目录
-> -d	制定解压后文件的存放目录
-
-#### tar ：打包
-tar [选项] XXX.tar.gz 将要打包进去的内容
-> 选项说明
-> -c    产生.tar打包文件
-> -v    显示详细信息
-> -f    制定压缩后文件名
-> -z    打包同时压缩
-> -x    解包.tar文件
-> -C    解压到指定目录
-
-```
-压缩目录
-[root@curry ~]# tar -zcvf xiyou.tar.gz xiyou/
-解压到指定目录
-[root@curry ~]# tar -zxvf xiyou.tar.gz -C /opt
-```
-
-### 7.9 磁盘查看和分区类
-#### du ：查看文件和目录占用的磁盘空间
-du: disk usage 磁盘占用情况
-du 目录/文件（功能描述：显示目录下每个子目录的磁盘使用情况）
-> 选项说明
--h 以人们较易阅读的GBytes, MBytes, KBytes 等格式自行显示；
--a 不仅查看子目录大小，还要包括文件
--c 显示所有的文件和子目录大小后，显示总和
--s 只显示总和
---max-depth=n 指定统计子目录的深度为第n 层
-
-#### df ：查看磁盘空间使用情况
-df: disk free 空余磁盘
-df 选项
--h 以人们较易阅读
-
-#### lsblk ：查看设备挂载情况
-lsblk （功能描述：查看设备挂载情况）
-
-#### mount/umount ：挂载/卸载
-1）挂载前准备（必须要有光盘或者已经连接镜像文件）
-2）基本语法
-mount [-t vfstype] [-o options] device dir （功能描述：挂载设备）
-umount 设备文件名或挂载点（功能描述：卸载设备）
-> 选项说明
--t vfstype 指定文件系统的类型，通常不必指定。mount自动选择正确的类型。
--o options 主要用来描述设备或档案的挂接方式。常用的参数有：
-loop：用来把一个文件当成硬盘分区挂接上系统
-ro：采用只读方式挂接设备
-rw：采用读写方式挂接设备
-iocharset：指定访问文件系统所用字符集
-device 要挂接(mount)的设备
-dir 设备在系统上的挂接点(mount point)
-
-#### fdisk ：分区
-fdisk -l （功能描述：查看磁盘分区详情）
-fdisk 硬盘设备名（功能描述：对新增硬盘进行分区操作）
-经验技巧
-该命令必须在root 用户下才能使用
-
----
-
-# **Linux**
-远程拷贝
-scp(secure copy)：使用的协议是ssh协议
-用户名@IP:路径
-
-ssh-keygen 创建密钥
-id_rsa 密钥
-id_rsa.pub 公钥
-
-![](img/2023-09-19-20-07-22.png)
-
-## 生成代码
-### gcc
-![](img/2023-09-19-20-09-59.png)
-
-### 编译
-* 预处理 gcc -E
-* 编译 gcc -S
-* 汇编 as
-* gcc -D 相当于加#define
-* gcc -I 增加搜索路径
-* gcc -O 编译优化(0不优化，1产品，2开源，3。优化越深C与汇编对应乱)
-* gcc -wall
-
-### 链接
-目标文件 gcc -c
-库文件
-引导代码
-
-连接过程把函数名字->地址
-ld 直接调用
-gcc 间接调用 -函数/全局变量未定义或多次定义/缺少main函数 连接错误
-链接生成可执行程序 ./文件名 执行程序
-
-- 库文件：公用的工具，特殊的目标文件，他人写好的公开发行的。
-静态库  先生成产品
-![](img/2023-09-19-21-26-21.png)
-动态库  运行过程中加入产品
-![](img/2023-09-19-21-29-15.png)
-
-### makefile
-
-#### **遵循增量编译**
-“目标：依赖” 只有目标不存在/目标比依赖旧 才执行命令
-
-#### 规则
-![](img/2023-09-19-22-32-44.png)
-
-#### 伪目标
-设定一个一定执行的指令
-1. 目标不存在
-2. 执行命令生成不了目标
-
-#### 变量
-1. 自定义变量
-    变量名：=值 字符串类型 
-    引用变量 $(变量名)
-2. 预定义变量
-    \$(CC),$(RM)
-3. 自动变量
-    同一变量名，值随着规则而变化
-    \$^ 所有依赖 $@ 目标
-
-#### %匹配符
-用在第二个规则，按格式从上一个规则的以来部分匹配
-
-#### 函数
-$(wildcard *.c) 从当前目录所有文件中，取出符合要求的文件名
-
-\$(patsubst %.c,%.o,$(src)) 从第三个参数中按照第一个参数的格式匹配并转为第二个参数
-
-
-## 调试
-
-### 编译选项
--g 补充调试信息
--O0 不开优化
-
-### gbd
-gbd- GNU Debugger
-gdb 文件名
-
-### 命令
-* list / l [文件名:] [行号] | [函数名]   看文件内容
-* run / r     运行程序
-* break / b   [文件名:] [行号] | [函数名] 打断点
-* continue / c    继续运行
-* step / s 相当 vs F11
-* next / n 相当于vs F10
-* finish  跳出本次函数调用
-* info break / i b    查看断点信息
-* delete [num]    删除断点
-* ignore  [num] [count]   忽略 num 断点 n 次
-
-### 监视
-* print / p 表达式
-* diaplay   表达式 删除 先 info dispaly 再 undisplay
-
-### 查看内存
-![](img/2023-09-19-21-44-01.png)
-
-### 出错调试
-core文件 - 程序崩溃时刻内存的堆栈
-Segmentation fault 段错误
-1. 编译加上 -g -O0
-2. ulimit -c unlimited
-3. 执行程序
-4. gdb 可执行 core
 
 # **Linux系统编程**
 
@@ -667,315 +113,138 @@ Segmentation fault 段错误
     4）返回值和报错的关系
 3. 细节描述 - 按需查看
 
-## fopen的a a+ 模式
-FILE 文件流/用户态文件缓冲区
-* a 只写追加    默认从文件结尾写入
-* a+ 读写追加   打开时处于文件开始，写入时跳到文件末尾
-流 ：ptr 每次读写自动后移
 
-## 文件的属性chmod
-node_t 无符号32位八进制数
 
-## 目录 
-### getcwd
-![](img/2023-09-20-00-16-37.png)
+重概念
+进程：正在执行的程序
+![](img/2023-09-21-13-38-42.png)
+### 缺陷
+- 多道程序设计
+1.缺乏隔离
+2.内存利用率低
+3.地址使用麻烦，只能使用相对地址
 
-### chdir
-只改变子进程
-![](img/2023-09-20-00-17-21.png)
+利用虚拟内存 用户- 虚拟内存 - 内存
+每个进程在逻辑有自己独立的内存空间
 
-### mkdir rmdir
-所有创建文件的行为都会受到 umask 的影响
+- 分时系统的缺陷
+用户主动要主动放弃CPU
 
-### **目录流**
-* 链表 + ptr
-目录流 - 目录文件在内存中的缓冲区
-ptr 自动后移- 用户可以不了解结构访问所有数据
-![](img/2023-09-20-00-19-40.png)
+用户 - 虚拟CPU - CPU
+让用户觉得自己是 CPU 的独占者
+在某一时刻，多个进程同时进行 - 并行
+在某一段时间，多个进程同时进行 - 并发
 
-* opendir
-DIR *opendir(const char *name);
-* closedir
-int closedir(DIR *dirp);
-* readdir
-struct dirent *readdir(DIR *dirp);
-struct dirent - 目录项
+### 虚拟内存的实现
+**局部性原理**
+![](img/2023-09-21-14-30-02.png)
 
-## stat
-![](img/2023-09-20-10-51-48.png)
-#### 类型和权限
-st_mode 32位
-### 硬链接数
-l
-### uid
-getpwuid
-### gid
-getgrgid
-### 大小
-st_size
-### 时间
-mtime 长整型 计算机时间
-日历时间    ctime
-localtime   精确控制
+### 进程的切换
+![](img/2023-09-21-15-02-03.png)
+![](img/2023-09-21-15-08-22.png)
 
-## 自己实现tree命令
-对文件树采用深度优先遍历
-深度优先遍历用递归/栈
-广度优先遍历用队列
+### 进程的概念
+用户角度看，进程是正在进行的程序
+操作系统来看，进程是资源（cpu和内存）分配的基本单元
 
-## 不带缓冲区的文件IO
-![](img/2023-09-20-10-52-38.png)
-![](img/2023-09-20-10-54-39.png)
-### 属性
-![](img/2023-09-20-12-16-56.png)
+### 操作系统怎么样管理进程
+进程：任务
+教科书 - PCB 进程控制块
+Linux -  task_struct 任务描述符 任务队列
+task_struct 描述了进程的一切信息
 
-### open
-\#include <fcntl.h>
-int open(const char *pathname, int flags);
-int open(const char *pathname, int flags, mode_t mode);
-```c
-#include <myself.h>
-int main(int argc, char *argv[]) {
-    // ./open file1
-    ARGS_CHECK(argc,2);
-    //int fd = open(argv[1], O_WRONLY);
-    //int fd = open(argv[1],O_WRONLY|O_CREAT,0666);
-    //创建文件行为，总是会受到umask影响
-    int fd = open(argv[1],O_WRONLY|O_CREAT|O_EXCL,0666);
-    ERROR_CHECK(fd,-1,"open");
-    printf("fd = %d\n",fd);
-    close(fd);
-}
-```
-fopen底层调用了open
+### pid
+pid是一个正整数，给用户来标识不同的进程。唯一的正整数标识符
+在linux中进程存在亲缘关系
 
-### 读写文件read write
-#### read write
- ssize_t read(int fd, void *buf, size_t count);
- ssize_t write(int fd, const void *buf, size_t count);
-![](img/2023-09-20-12-32-44.png)
+![](img/2023-09-21-16-10-14.png)
 
-```c
-#include <myself.h>
-int main(int argc, char *argv[]) {
-    // ./open file1
-    ARGS_CHECK(argc,2);
-    int fd = open(argv[1], O_RDWR);
-    ERROR_CHECK(fd,-1,"open");
-    printf("fd = %d\n",fd);
-    char buf[10] = {0};
-    ssize_t ret = read(fd,buf,sizeof(buf));
-    ERROR_CHECK(ret,-1,"read");
-    puts(buf);
-    close(fd);
-}
-```
+### 获取 pid
+pid_t getpid(void);
+pid_t grtppid(void);
 
-```c
-#include <myself.h>
-int main(int argc, char *argv[]) {
-    // ./open file1
-    ARGS_CHECK(argc,2);
-    int fd = open(argv[1], O_RDWR);
-    ERROR_CHECK(fd,-1,"open");
-    printf("fd = %d\n",fd);
-    // char buf[10] = "hello";//这里如果是字符串，就是文本文件
-    // write(fd,buf,strlen(buf));
-    int i = 10000000;
-    write(fd,&i,sizeof(i));
-    close(fd);
-}
-```
-二进制文件更好
+同一个程序可对应多个进程
 
-#### **实现cp命令**
-申请空间buf，先read，再write。
-![](img/2023-09-20-13-58-07.png)
-网盘项目在此基础上
-```c
-#include <myself.h>
-int main(int argc, char *argv[]) {
-    // ./cp src des
-    ARGS_CHECK(argc,3);
-    int fdr = open(argv[1],O_RDONLY);
-    ERROR_CHECK(fdr,-1,"open");
-    int fdw = open(argv[2],O_WRONLY | O_CREAT | O_TRUNC);
-    ERROR_CHECK(fdw,-1,"open");
-    char buf[4096] = {0};
-    while(1) {
-        //先清空
-        memset(buf,0,sizeof(buf));
-        ssize_t ret = read(fdr,buf,sizeof(buf));
-        if (ret == 0) {
-            break;
-        }
-        write(fdw,buf,ret);//第三个参数ret，表示读多少写多少。
-    }
-    close(fdr);
-    close(fdw);
-}
-```
+### 进程的权限
+文件的权限 r w x {u,g,o}
+进程权限取决于进程有什么样的身份
 
-#### 性能问题
-- read
-用户态陷入内核态。
-buf越大越好（4096），减少状态切换的次数
+uid_t getuid(void); - 真实身份
+uid_t geteuid(void); - 有效身份
 
-- 使用文件流 fread fwrite
-1优势：零碎的写入，少量的系统调用
-2劣势：拷贝次数更多
+user有可执行程序的 x 权限，通过该程序启动一个进程，进程的uid 和 euid 都是user
 
-### 文件的截断ftruncate
-int ftruncate(int fd, off_t length);
-大 -> 小    阶段末尾
-小 -> 大    补0
-可以用来创建一个固定大小的文件
+12位权限
+![](img/2023-09-21-16-38-47.png)
 
-### 内存映射mmap
-void *mmap(void *addr, size_t length, int prot, int flags,int fd, off_t offset);
+#### suid权限
+针对可执行程序 - 动态权限
+① u 的 x 和 o 的 x 必须存在
+② u 的 s 存在(suid)
 
-int munmap(void *addr, size_t length);
+O用户通过该执行程序启动的进程 euid更改为程序的拥有者
 
-![](img/2023-09-20-15-21-29.png)
+#### sgid权限
+针对可执行程序 - 动态权限
+① g 的 x 和 o 的 x 必须存在
+② g 的 s 存在(sgid)
 
-![](img/2023-09-20-15-22-03.png)
-用户态内存与磁盘建立映射，实现用[]就可以访问
+O用户通过该执行程序启动的进程 egid更改为程序的拥有组
 
-### lseek
-off_t lseek(int fd, off_t offset, int whence);
-可以引起文件空洞
-* lseek 与 fseek
-lseek：操作内核态，直接改变磁盘文件
-fseek：操作用户态
+#### sticky 粘滞位
+针对目录文件
+对于 o 用户，拥有 w 和 t（sticky） 权限
+o 用户可以新建文件 可以删除自己的文件 不能删除别人的文件
 
-### 文件流底层使用了文件对象
-面向接口编程
-文件流打开就用文件流方式操作 fopen - fread fwrite
-文件描述符打开就用文件描述符操作 open - read write
+### 进程相关的命令
+![](img/2023-09-21-18-05-30.png)
 
-```c
-#include <myself.h>
-int main (int argc, char *argv[]) {
-    // ./fileno file1
-    ARGS_CHECK(argc,2);
-    FILE *fp = fopen(argv[1],"r+");
-    ERROR_CHECK(fp,NULL,"fopen");
-    printf("fileno = %d\n", fileno(fp));
-    //int ret = write(3,"hello",5); //3是魔法数
-    // int ret = write(fp->_fileno,"hello",5); //代码即注释
-    int ret = write(fileno(fp),"hello",5); //面向接口编程
-    ERROR_CHECK(ret,-1,"write");
-    fclose(fp);
-}
-```
-获取文件描述符
-int fileno(FILE *stream);
+#### ps-elf
+![](img/2023-09-21-18-24-30.png)
 
-### printf对应的fd是1
-printf -> write(1)
-如果先close(1),再open一个文件（该文件的fd是1）
-再使用printf -> write(1)
-把1不指向屏幕
+#### ps aux
+![](img/2023-09-21-18-20-29.png)
 
-### 文件描述符的复制
-两个文件描述符指向同一地方
-1. 数值上不同
-2. 偏移量共享
+free 看内存
+![](img/2023-09-21-18-20-50.png)
 
-int dup(int oldfd);
-选择一个最小可用的fd，和oldfd同指向
+#### top
+获取实时的进程状态
 
-int duo2(int oldfd, int newfd);
-让newfd与oldfd指向同一文件对象，如果newfd还有指向，就会自动close。
+buffers与cached区别：
+buffers指的是块设备的读写缓冲区
+cached指的是文件系统本身的页面缓存。
+他们都是Linux系统底层的机制，为了加速对磁盘的访问。
 
-引用计数，记录有几个关联的描述符，直至所有的释放在close。
+#### 优先级系统
+Linux的优先级总共的范围有140，对于ubuntu操作系统而言，其范围是-40到99，优先级的数值越低，表示其优先级越高。
 
-实现重定向。
+Linux中拥有两种类型的调度策略，分别是实时调度策略和普通调度策略。
 
-### 有名管道
-named pipe / FIFO
-是进程间通信机制在文件系统的映射
+nice值可以用来调整优先级，
+其范围为-20～19。其中正数表示降低权限，负数表示提升权限。
 
-传输方式：
-单工    A -> B
-半双工  A -> B | B-> A 不同时
-全双工  A <-> B
+使用nice命令和renice命令可以用来调整nice值。
+![](img/2023-09-21-19-00-06.png)
 
-mkfifo - make FIFOs (named pipes)
+#### 前台和后台
+前台 可以响应键盘中断的进程
+ctrl+c 表示终止信号， ctrl+z 表示暂停信号 
+后台 不可以响应
+当进程处于后台的时候，只能通过kill 命令发送信号给它。
 
-### 用系统调用操作管道
-open 
-O_WRONLY    写端
-O_RDONLY    读端
+使用shell启动进程的时候如果在末尾加上& 符号可以用来直接运行后台进程。
 
-![](img/2023-09-20-20-28-09.png)
-open会导致阻塞
+使用ctrl+z 可以暂停当前运行的前台进程，并将其放入后台。它也会输出一个任务编号到屏幕上。
 
-当一个进程打开了（open）了管道一端时，如果对端未被打开，进程处于阻塞状态，直到对端被另一个进程打开。
+使用jobs 命令可以查看和管理所有的后台任务，使用fg 命令可以将后台进程拿到前台来。使用bg 命令可以将后台暂停的程序运行起来。
+![](img/2023-09-21-19-05-02.png)
 
-### 死锁的产生
-![](img/2023-09-20-21-08-20.png)
+#### crontab 定时任务
+crontab 可以实现定期执行任务
+使用crontab -e 然后选择合适的文本编辑器。或者直接用root权限打开/etc/crontab 文件
 
-解决：
-调整顺序
-![](img/2023-09-20-22-00-28.png)
-
-### 全双工通信
-![](img/2023-09-20-21-18-36.png)
-
-### **引入 IO 多路复用**
-![](img/2023-09-20-22-06-48.png)
-#### **select**
-![](img/2023-09-20-22-17-27.png)
-
-\#include <sys/select.h>
-
-int select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds, struct timeval *timeout);
-
-void FD_CLR(int fd, fd_set *set);
-
-int  FD_ISSET(int fd, fd_set *set);
-
-void FD_SET(int fd, fd_set *set);
-
-void FD_ZERO(fd_set *set);
-
-fd_set -监听集合
-1. 创建fd_set
-2. 设置合适的fd监听
-        FD_ZERO 清空
-        FD_SET  加入监听
-3. 调用select 函数，会让进程阻塞
-4. 当监听的fd中，有任何一个就绪，则select就绪
-5. 轮流询问（轮询）所有监听的fd，是否就绪FD_ISSET
-```c
-#include <myself.h>
-int main(int argc, char *argv[]) {
-    // ./chat1 1.pipe 2.pipe
-    ARGS_CHECK(argc,3);
-    int fdr = open(argv[1],O_RDONLY);
-    int fdw = open(argv[2],O_WRONLY);
-    puts("pipe open!");
-    char buf[4096] = {0};
-    fd_set rdset;
-    while(1) {
-        FD_ZERO(&rdset);
-        FD_SET(fdr,&rdset);
-        FD_SET(STDIN_FILENO,&rdset);
-        select(fdr+1,&rdset,NULL,NULL,NULL);
-        if(FD_ISSET(STDIN_FILENO,&rdset)) {
-            puts("msg from stdin");
-            memset(buf,0,sizeof(buf));//清空
-            read(STDIN_FILENO,buf,sizeof(buf));
-            write(fdw,buf,strlen(buf));//向管道fdw写，有多少写多少
-        }
-        if(FD_ISSET(fdr,&rdset)) {
-            puts("msg from pipe");
-            memset(buf,0,sizeof(buf));//清空
-            read(fdr,buf,sizeof(buf));//从管道fdr读
-            puts(buf);
-        }
-    }
-}
-```
+每项任务拥有六个字段，分别表示
+分钟（0～60）、小时（0～23）、日期（1～31）、月份（1～12）、周（0～7 0和7都代表周日）和要执行的命令。如果是修改文件，还需要在执行命令的前面添加用户名。
+![](img/2023-09-21-19-11-15.png)
 
