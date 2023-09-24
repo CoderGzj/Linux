@@ -1,4 +1,15 @@
-# 文件目录初识
+
+# 基于文件指针的文件模式
+
+## 文件的创建，打开与关闭
+fopen以mode的方式打开或创建文件，如果成功，将返回一个文件指针，失败则返回NULL。
+FILE* fopen(const char* path, const char* mode);
+
+int fclose(FILE* stream);
+
+## 读写文件
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
+size_t fwrite(void *ptr, size_t size, size_t nmemb, FILE *stream);
 
 ## fopen的a a+ 模式
 FILE 文件流/用户态文件缓冲区
@@ -6,11 +17,13 @@ FILE 文件流/用户态文件缓冲区
 * a+ 读写追加   打开时处于文件开始，写入时跳到文件末尾
 流 ：ptr 每次读写自动后移
 
-## 文件的属性chmod
-node_t 无符号32位八进制数
+## 文件的权限chmod
+int chmod(const char* path, mode_t mode);
+mode_t 无符号32位八进制数
 
-## 目录 
+# 目录操作
 
+## 获取、改变当前目录
 ### getcwd
 ![](img/2023-09-20-00-16-37.png)
 
@@ -18,10 +31,12 @@ node_t 无符号32位八进制数
 只改变子进程
 ![](img/2023-09-20-00-17-21.png)
 
+## 创建和删除目录
 ### mkdir rmdir
 所有创建文件的行为都会受到 umask 的影响
 
-## **目录流**
+## 目录的存储原理
+### **目录流**
 * 链表 + ptr
 目录流 - 目录文件在内存中的缓冲区
 ptr 自动后移- 用户可以不了解结构访问所有数据
@@ -35,7 +50,7 @@ int closedir(DIR *dirp);
 struct dirent *readdir(DIR *dirp);
 struct dirent - 目录项
 
-## stat
+### stat
 ![](img/2023-09-20-10-51-48.png)
 - 类型和权限
 st_mode 32位
@@ -52,7 +67,7 @@ mtime 长整型 计算机时间
 日历时间    ctime
 localtime   精确控制
 
-## 自己实现tree命令
+### 自己实现tree命令
 对文件树采用深度优先遍历
 深度优先遍历用递归/栈
 广度优先遍历用队列
@@ -164,7 +179,7 @@ buf越大越好（4096），减少状态切换的次数
 
 ## 文件的截断ftruncate
 int ftruncate(int fd, off_t length);
-大 -> 小    阶段末尾
+大 -> 小    截断末尾
 小 -> 大    补0
 可以用来创建一个固定大小的文件
 
