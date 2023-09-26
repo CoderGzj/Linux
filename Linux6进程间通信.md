@@ -70,13 +70,22 @@ int shmget(key_t key, size_t size, int shmflg);
 * shmget 的返回值表示共享内存段的描述符，以供后续使用。
 
 使用shmat 接口根据一个指定描述来建立连接。
+
 void *shmat(int shmid, const void *shmaddr, int shmflg);
+
+shmaddr参数一般设置为空指针，表示在堆空间中自动分配区域映射共享内存段。shmflg表示权限（事实上这个权限是多余的），一般就是0。
 
 ![](img/2023-09-23-18-04-30.png)
 
+## 使用共享内存进行进程间通信
 
+## 两个进程同时对共享内存写入
 
+## 解除共享内存映射
 
+## 修改共享内存属性
 
+## 私有共享内存
 
-# 
+## 虚拟地址和物理地址转换机制
+
