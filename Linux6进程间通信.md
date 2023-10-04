@@ -53,27 +53,22 @@ int link(const char *oldpath, const char *newpath);
 可以发现非常多进程都使用C标准库文件
 
 ## System V 版本的共享内存
-* 内核使用一个非负整数键（key）来区分不同的共享内存区域（或者是信号量或消息队列）。服务端进程和客户端进程可以使用同一个键来定位共享内存段进行通信。
-
+* 内核使用一个非负整数键（key）来区分不同的共享内存区域（或者是信号量或消息队列）。服务端进程和客户端进程可以使用同一个键来定位共享内存段进行通信
 * 键可以手动指定，也可以使用接口ftok 生成。ftok 需要根据一个已存在的文件和一个项目ID（0～255的整数）来生成一个键。
-
 key_t ftok(const char *pathname, int proj_id);
 
 ## 创建/获取共享内存
 使用shmget 接口可以根据键来获取一个共享内存段。创建的共享内存段的所有字节会被初始化为0。
-
 int shmget(key_t key, size_t size, int shmflg);
-
 * key参数表示传入的键，可以是一个正数或者是宏IPC_PRIVATE。
 * size表示共享内存的大小，其取值应当是页大小的整数倍。
 * shmflg表示共享内存的属性，其最低9位表示各个用户对其的读/写/执行权限。
 * shmget 的返回值表示共享内存段的描述符，以供后续使用。
 
 使用shmat 接口根据一个指定描述来建立连接。
-
 void *shmat(int shmid, const void *shmaddr, int shmflg);
-
-shmaddr参数一般设置为空指针，表示在堆空间中自动分配区域映射共享内存段。shmflg表示权限（事实上这个权限是多余的），一般就是0。
+* shmaddr参数一般设置为空指针，表示在堆空间中自动分配区域映射共享内存段
+* shmflg表示权限（事实上这个权限是多余的），一般就是0。
 
 ![](img/2023-09-23-18-04-30.png)
 
@@ -124,12 +119,13 @@ shmaddr参数一般设置为空指针，表示在堆空间中自动分配区域�
 ![](img/2023-10-02-13-31-47.png)
 
 int semget(key_t key, int nsems, int semflg);
-nsems参数表示集合中总共有多少个信号量值
+* nsems参数表示集合中总共有多少个信号量值
+* shmflg表示共享内存的属性
 
 int semctl(int semid, int semnum, int cmd, ...);
-semid参数是信号量的标识符，就是semget 的返回值
-semnum表示某个信号量值在信号量集合中的索引（范围从0开始）
-cmd参数表示要执行的操作：
+* semid：信号量的标识符，就是semget 的返回值
+* semnum：某个信号量值在信号量集合中的索引（范围从0开始）
+* cmd参数表示要执行的操作：
 IPC_STAT表示要获取信号量状态
 IPC_SET表示要设置信号量状态，可变参数要设置为状态结构体的指针
 IPC_RMID表示要删除信号量，不需要设置可变参数，注意和共享内存的删除不同，信号量是立即删除的
@@ -138,8 +134,8 @@ SETVAL表示设置某个信号量值，可变参数传入数值
 
 使用semop 配合恰当的参数可以实现P操作和V操作。
 int semop(int semid, struct sembuf *sops, size_t nsops);
-semid参数是信号量的标识符
-sops是描述操作的结构体，sem_num成员表示信号量值的索引，sem_op表示信号量数值的变化，sem_flg表示一些其他控制信息。
+* semid：信号量的标识符
+* sops：描述操作的结构体，sem_num成员表示信号量值的索引，sem_op表示信号量数值的变化，sem_flg表示一些其他控制信息。
 ![](img/2023-10-02-13-25-09.png)
 
 信号量在操作系统的查看信息ipcs 和手动删除ipcrm 的操作和共享内存是一致的。
@@ -177,3 +173,27 @@ int gettimeofday(struct timeval *tv, struct timezone *tz);
 而使用SEM_UNDO的时候，如果进程在加锁状态下终止，那么信号量的数值会直接根据加锁次数回退，并且最小值为0。
 
 # 消息队列
+广义的消息队列指的是一种用于在多个进程（通常是跨机器的）之间的通信机制。
+
+这里所描述的是狭义的消息队列，它是一种进程间通信的手段，只适用于在本地的多进程进行通信。
+
+区别于管道的流式结构，消息队列最显著的特点就是它维持一个消息的链表，并且可以使用先进先出的方式来进行取出消息。除此以外，消息队列使用的时候不需要先打开读端写端，可以直接往其中写入数据。
+
+![](img/2023-10-03-10-14-29.png)
+
+- msgget 可以用来创建一个消息队列。
+int msgget(key_t key, int msgflg);
+- msgsnd 将新消息加入到队列末尾
+int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);
+msgp：指向一个消息数据，它的长度应当小于系统规定的上限，第一个成员必须是长整型表示消息类型。这个结构体类型必须要重新声明。
+msgsz：消息中mtext数组的大小。
+flag：的值可以设置为IPC_NOWAIT表示非阻塞方式发送数据。
+
+- msgrcv 可以用来读取消息
+ssize_t msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp,int msgflg);
+msgtyp：可以用指定要读取的数据的类型，类型匹配的消息会按先进先出的方式取出，如果该参数为0，则会无视类型取出第一个消息。
+
+# proc目录
+Linux系统上的/proc目录是一种文件系统，即proc文件系统。
+/proc是一种伪文件系统（也即虚拟文件系统），存储的是当前内核运行状态的一系列特殊文件。
+用户可以通过这些文件查看有关系统硬件及当前正在运行进程的信息，甚至可以通过更改其中某些文件来改变内核的运行状态。
