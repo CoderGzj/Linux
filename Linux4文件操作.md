@@ -1,8 +1,8 @@
-
 # 基于文件指针的文件模式
 
 ## 文件的创建，打开与关闭
 fopen以mode的方式打开或创建文件，如果成功，将返回一个文件指针，失败则返回NULL。
+
 FILE* fopen(const char* path, const char* mode);
 
 int fclose(FILE* stream);
