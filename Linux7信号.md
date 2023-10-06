@@ -98,6 +98,7 @@ int sigaction(int signum, const struct sigaction *act, struct sigaction
 
 ## sa_flags的取值集合
 ![](img/2023-10-04-16-54-40.png)
+
 ![](img/2023-10-04-16-55-01.png)
 
 ## sa_mask设置阻塞集合
