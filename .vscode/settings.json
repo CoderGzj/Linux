@@ -1,15 +1,12 @@
 {
     "files.associations": {
-<<<<<<< HEAD
         "myself.h": "c",
         "stdlib.h": "c",
         "select.h": "c"
     }
-=======
         "myself.h": "c"
     },
     "pasteImage.basePath": "${currentFileDir}",
     "pasteImage.path": "${currentFileDir}/img",
     "pasteImage.defaultName": "Y-MM-DD-HH-mm-ss"
->>>>>>> a9f3014c1bf4d4704eca9ec870fafa038e9795ad
 }
