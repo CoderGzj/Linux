@@ -1,17 +1,21 @@
 #include <myself.h>
 #define NUM 10
+
 typedef struct queue_s{
     int elem[NUM];
     int size;
     int front;
     int rear;
 }queue_t;
+
 typedef struct shareRes_s{
     queue_t queue;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
 }shareRes_t;
+
 int cnt;
+
 void *producer(void *arg){
     shareRes_t *pshareRes = (shareRes_t *)arg;
     while(1) {
