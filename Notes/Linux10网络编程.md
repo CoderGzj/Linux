@@ -334,12 +334,72 @@ int setsockopt(int sockfd, int level, int optname,const void *optval, socklen_t 
 ![](img/2023-10-17-23-14-12.png)
 
 ## select 监听 socket 支持断开重连
+accept 会造成阻塞。实际上服务端可以使用select 管理监听套接字，检查其全连接队列是否存在已经建好的连接，如果存在连接，那么其读事件即accept 操作便就绪
 
+* 每次重新调用select 之前需要提前准备好要监听的文件描述符，这些文件描述符当中可能会包括
+新的已连接套接字的文件描述符。
+* select 的第一个参数应当足够大，从而避免无法监听到新的已连接套接字的文件描述符（它们的数值可能会比较大）。
+* 需要处理accept 就绪的情况。
+
+采用上面的调整之后，服务端就可以支持客户端断开重连了。
+
+```c
+// accept要放在select之后
+    // 去使用时确保从标准输入中输入数据在客户端建立连接后
+    // accept之后创建新的netFd,这个netFd加入监听--->分离监听和就绪
+    // 客户端如果断开连接以后，服务端不要退出，要取消监听netFd
+
+    fd_set rdset; //单纯保存就绪的fd
+    fd_set monitorSet;//使用一个单独的监听集合
+    FD_ZERO(&monitorSet);
+    FD_SET(STDIN_FILENO,&monitorSet);
+    FD_SET(sockFd,&monitorSet);
+    char buf[4096] = {0};
+    int netFd = -1;
+    while(1) {
+        memcpy(&rdset,&monitorSet,sizeof(fd_set));
+        select(20,&rdset,NULL,NULL,NULL);
+        if(FD_ISSET(STDIN_FILENO,&rdset)) {
+            bzero(buf,sizeof(buf));
+            ret = read(STDIN_FILENO,buf,sizeof(buf));
+            if(ret == 0) {
+                send(netFd,"nishigehaoren",13,0);
+                break;
+            }
+            send(netFd,buf,strlen(buf),0);
+        }
+        if(FD_ISSET(sockFd,&rdset)) {
+            netFd = accept(sockFd,NULL,NULL);
+            ERROR_CHECK(netFd,-1,"accept");
+            FD_SET(netFd,&monitorSet);
+            puts("new connect is accepted!");
+        }
+        if(FD_ISSET(netFd,&rdset)) {
+            bzero(buf,sizeof(buf));
+            ret = recv(netFd,buf,sizeof(buf),0);
+            if(ret == 0) {
+                puts("bye bye");
+                FD_CLR(netFd,&monitorSet);
+                close(netFd);
+                netFd = -1;
+                continue;
+            }
+            puts(buf);
+        }
+    }
+    close(sockFd);
+    close(netFd);
+```
+
+![](img/2023-10-18-10-26-49.png)
 
 # 4 UDP 通信
 
+
 # 5 epoll 系统调用
 
+
 # 6 socket 属性调整
+
 
 # 7 recv 和 send 的标志  
