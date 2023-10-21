@@ -395,6 +395,29 @@ accept 会造成阻塞。实际上服务端可以使用select 管理监听套接
 
 # 4 UDP 通信
 
+![](img/2023-10-19-09-35-51.png)
+
+## sendto 和 recvfrom
+这两个函数的行为类似于send 和recv ，不过会有一些额外的参数，用来指定或者保存对端的套接字地址结构以及对应的大小。
+
+```c
+ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,const struct sockaddr *dest_addr, socklen_t addrlen);
+ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,struct sockaddr *src_addr, socklen_t *addrlen);
+```
+
+在使用UDP进行的通信的时候，要特别注意的是这是一个无连接的协议。
+* 调用socket 函数的时候需要设置SOCK_DGRAM 选项
+* 必须由客户端先调用sendto 发送消息给服务端
+* select 之前先recvfrom
+
+UDP是一种保留消息边界的协议，无论用户态空间分配的空间是否足够recvfrom 总是会取出一个完整UDP报文，那么没有拷贝的用户态内存的数据会直接丢弃。
+
+> 主机A向主机B发送数据，以TCP方式发送3个包，对方可能会收到几个包？答：任意个
+> 以UDP方式发送3个包，对方可能会收到几个包？答：至多3个
+
+## 使用 UDP 即时聊天
+UDP是无连接协议，客户端需要先发送一个消息让服务端知道客户端的地址信息，然后再使用select 监听网络读缓冲区和标准输入即可。
+
 
 # 5 epoll 系统调用
 
