@@ -1,0 +1,63 @@
+#include <myself.h>
+int main(int argc, char *argv[]) {
+    // ./server 192.168.227.131 1234
+    ARGS_CHECK(argc,3);
+    int sockFd = socket(AF_INET,SOCK_STREAM,0);
+    ERROR_CHECK(sockFd,-1,"socket");
+    int optval = 1;
+    int ret = setsockopt(sockFd,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int));
+    ERROR_CHECK(ret,-1,"setsockopt");
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(atoi(argv[2]));
+    addr.sin_addr.s_addr = inet_addr(argv[1]);
+    ret = bind(sockFd,(struct sockaddr *)&addr,sizeof(addr));
+    ERROR_CHECK(ret,-1,"bind");
+    ret = listen(sockFd,10);
+    ERROR_CHECK(ret,-1,"listen");
+    // accept要放在select之后
+    // 去使用时确保从标准输入中输入数据在客户端建立连接后
+    // accept之后创建新的netFd,这个netFd加入监听--->分离监听和就绪
+    // 客户端如果断开连接以后，服务端不要退出，要取消监听netFd
+
+    fd_set rdset; //单纯保存就绪的fd
+    fd_set monitorSet;//使用一个单独的监听集合
+    FD_ZERO(&monitorSet);
+    FD_SET(STDIN_FILENO,&monitorSet);
+    FD_SET(sockFd,&monitorSet);
+    char buf[4096] = {0};
+    int netFd = -1;
+    while(1) {
+        memcpy(&rdset,&monitorSet,sizeof(fd_set));
+        select(20,&rdset,NULL,NULL,NULL);
+        if(FD_ISSET(STDIN_FILENO,&rdset)) {
+            bzero(buf,sizeof(buf));
+            ret = read(STDIN_FILENO,buf,sizeof(buf));
+            if(ret == 0) {
+                send(netFd,"nishigehaoren",13,0);
+                break;
+            }
+            send(netFd,buf,strlen(buf),0);
+        }
+        if(FD_ISSET(sockFd,&rdset)) {
+            netFd = accept(sockFd,NULL,NULL);
+            ERROR_CHECK(netFd,-1,"accept");
+            FD_SET(netFd,&monitorSet);
+            puts("new connect is accepted!");
+        }
+        if(FD_ISSET(netFd,&rdset)) {
+            bzero(buf,sizeof(buf));
+            ret = recv(netFd,buf,sizeof(buf),0);
+            if(ret == 0) {
+                puts("bye bye");
+                FD_CLR(netFd,&monitorSet);
+                close(netFd);
+                netFd = -1;
+                continue;
+            }
+            puts(buf);
+        }
+    }
+    close(sockFd);
+    close(netFd);
+}
