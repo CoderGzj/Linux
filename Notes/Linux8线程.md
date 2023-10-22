@@ -42,7 +42,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_r
 * start_routine 是一个函数指针类型的参数。地位相当于主线程的 main ,作为线程执行的入口函数。
 * arg 是传递给start_routine 的参数。
 
-不同线程都拥有自己独立唯一的线程id，NPTL使用pthread_t类型来保存线程id，了linux里是一个无符号长整型数。使用函数 pthread_self 可以获取本线程的id。
+不同线程都拥有自己独立唯一的线程id，NPTL使用pthread_t类型来保存线程id，linux里是一个无符号长整型数。使用函数 pthread_self 可以获取本线程的id。
 
 ![](img/2023-10-06-16-02-19.png)
 
