@@ -410,7 +410,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,struct sockaddr *s
 * 必须由客户端先调用sendto 发送消息给服务端
 * select 之前先recvfrom
 
-UDP是一种保留消息边界的协议，无论用户态空间分配的空间是否足够recvfrom 总是会取出一个完整UDP报文，那么没有拷贝的用户态内存的数据会直接丢弃。
+UDP是一种保留消息边界的协议，无论用户态空间分配的空间是否足够 recvfrom 总是会取出一个完整 UDP报文，那么没有拷贝的用户态内存的数据会直接丢弃。
 
 > 主机A向主机B发送数据，以TCP方式发送3个包，对方可能会收到几个包？答：任意个
 > 以UDP方式发送3个包，对方可能会收到几个包？答：至多3个
