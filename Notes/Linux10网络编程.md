@@ -336,8 +336,7 @@ int setsockopt(int sockfd, int level, int optname,const void *optval, socklen_t 
 ## select 监听 socket 支持断开重连
 accept 会造成阻塞。实际上服务端可以使用select 管理监听套接字，检查其全连接队列是否存在已经建好的连接，如果存在连接，那么其读事件即accept 操作便就绪
 
-* 每次重新调用select 之前需要提前准备好要监听的文件描述符，这些文件描述符当中可能会包括
-新的已连接套接字的文件描述符。
+* 每次重新调用select 之前需要提前准备好要监听的文件描述符，这些文件描述符当中可能会包括新的已连接套接字的文件描述符。
 * select 的第一个参数应当足够大，从而避免无法监听到新的已连接套接字的文件描述符（它们的数值可能会比较大）。
 * 需要处理accept 就绪的情况。
 
