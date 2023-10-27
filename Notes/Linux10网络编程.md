@@ -344,7 +344,7 @@ accept 会造成阻塞。实际上服务端可以使用select 管理监听套接
 
 ```c
 // accept要放在select之后
-    // 去使用时确保从标准输入中输入数据在客户端建立连接后
+    // 使用时确保从标准输入中输入数据在客户端建立连接后
     // accept之后创建新的netFd,这个netFd加入监听--->分离监听和就绪
     // 客户端如果断开连接以后，服务端不要退出，要取消监听netFd
 
@@ -417,9 +417,55 @@ UDP是一种保留消息边界的协议，无论用户态空间分配的空间�
 ## 使用 UDP 即时聊天
 UDP是无连接协议，客户端需要先发送一个消息让服务端知道客户端的地址信息，然后再使用select 监听网络读缓冲区和标准输入即可。
 
+```c
+#include <myself.h>
+int main(int argc, char *argv[]) {
+    // ./client_chat 192.168.227.131 1234
+    ARGS_CHECK(argc,3);
+    int sockFd = socket(AF_INET,SOCK_DGRAM,0);
+    ERROR_CHECK(sockFd,-1,"socket");
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(atoi(argv[2]));
+    addr.sin_addr.s_addr = inet_addr(argv[1]);
+    int ret = sendto(sockFd,"chat begin",10,0,(struct sockaddr *)&addr,sizeof(addr));
+    ERROR_CHECK(ret,-1,"sendto");
+    char buf[4096] = {0};
+    fd_set rdset;
+    while(1) {
+        FD_ZERO(&rdset);
+        FD_SET(STDIN_FILENO,&rdset);
+        FD_SET(sockFd,&rdset);
+        select(sockFd + 1,&rdset,NULL,NULL,NULL);
+        if(FD_ISSET(STDIN_FILENO,&rdset)) {
+            bzero(buf,sizeof(buf));
+            int ret = read(STDIN_FILENO,buf,sizeof(buf));
+            if(ret == 0) {
+                sendto(sockFd,buf,0,0,(struct sockadd *)&addr,sizeof(addr));
+                break;
+            }
+            sendto(sockFd,buf,strlen(buf),0,(struct sockadd *)&addr,sizeof(addr));
+        }
+        if(FD_ISSET(sockFd,&rdset)) {
+            bzero(buf,sizeof(buf));
+            socklen_t addrLen = sizeof(addr);
+            int ret = recvfrom(sockFd,buf,sizeof(buf),0,(struct sockaddr *)&addr,&addrLen);
+            if(ret == 0) {
+                break;
+            }
+            puts(buf);
+        }
+    }
+    close(sockFd);
+}
+```
 
 # 5 epoll 系统调用
+## epoll 的基本原理
 
+## 使用 epoll 取代 select
+
+## 使用 epoll 关闭长期不发消息的连接
 
 # 6 socket 属性调整
 
