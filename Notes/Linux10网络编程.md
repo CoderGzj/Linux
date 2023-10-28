@@ -461,11 +461,16 @@ int main(int argc, char *argv[]) {
 ```
 
 # 5 epoll 系统调用
+
 ## epoll 的基本原理
 
 ## 使用 epoll 取代 select
 
 ## 使用 epoll 关闭长期不发消息的连接
+
+## 非阻塞读操作
+
+## epoll 的边缘触发
 
 # 6 socket 属性调整
 
