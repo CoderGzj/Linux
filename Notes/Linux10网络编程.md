@@ -461,7 +461,7 @@ int main(int argc, char *argv[]) {
 ```
 
 # 5 epoll 系统调用
-s
+epoll select
 ## epoll 的基本原理
 
 ## 使用 epoll 取代 select
