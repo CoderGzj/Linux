@@ -461,7 +461,7 @@ int main(int argc, char *argv[]) {
 ```
 
 # 5 epoll 系统调用
-epoll select 区别 epoll在内核态
+epoll select 区别 epoll在内核态,select空间有限
 ## epoll 的基本原理
 
 ## 使用 epoll 取代 select
