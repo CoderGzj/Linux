@@ -466,16 +466,185 @@ select 的缺陷
 ## epoll 的基本原理
 和select 一样， epoll 也是一种IO多路复用机制，它可以监听多个设备的就绪状态，让进程或者线程只在有事件发生之后再执行真正的读写操作。
 epoll 可以在内核态空间当中维持两个数据结构：监听事件集合和就绪事件队列。
-。监听事件集合通常是一个红黑树，就绪事件队列是一个线性表。
+监听事件集合通常是一个红黑树，就绪事件队列是一个线性表。
 
 ![](img/2023-11-03-14-11-29.png)
-## 使用 epoll 取代 select
 
+和select 相比， epoll 的优势如下：
+* 除了水平触发，还支持边缘触发。
+* 监听事件集合容量很大，有多少内存就能放下多少文件描述符。
+* 监听事件集合常驻内核态，调用epoll_wait 函数不会修改监听性质，不需要每次将集合从用户态拷贝到内核态。
+* 监听事件和就绪事件的状态分为两个数据结构存储，当epoll_wait 就绪之后，用户可以直接遍历就绪事件队列，而不需要在所有事件当中进行轮询。
+
+## 使用 epoll 取代 select
+* epoll_create 用于在内核之中创建一个epoll 文件对象，包含监听事件集合和就绪设备集合。参数目前已经没有意义，填写一个大于0的数值即可。返回值是该文件对象对应的文件描述符。
+* epoll_ctl 用于调整监听事件集合。op 的选项是EPOLL_CTL_ADD 、MOD、DEL ，分别表示添加、修改和删除事件， event->events 用于描述事件的类型，其中EPOLLIN 表示读， EPOLLOUT 表示写。
+* epoll_wait 用于使线程陷入阻塞，直到监听的设备就绪或者超时。events 是一个传入传出参数，用于存储就绪设备队列，timeout 描述超时时间，单位是毫秒，-1是永久等待。maxevent 传入一个足够大的正数即可。返回值就是就绪设备队列的长度，即就绪设备的个数。
+
+```c
+int epoll_create(int size);
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+int epoll_wait(int epfd, struct epoll_event *events,int maxevents, int timeout);
+
+typedef union epoll_data {
+    void *ptr;
+    int fd;
+    uint32_t u32;
+    uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event {
+    uint32_t events; /* Epoll events */
+    epoll_data_t data; /* User data variable */
+};
+```
+![](img/2023-11-05-11-50-11.png)
+
+![](img/2023-11-05-12-36-17.png)
+
+```c
+#include <myself.h>
+int main(int argc, char *argv[]) {
+    // ./server 192.168.227.131 1234
+    ARGS_CHECK(argc,3);
+    int sockFd = socket(AF_INET,SOCK_STREAM,0);
+    ERROR_CHECK(sockFd,-1,"socket");
+    int optval = 1;
+    int ret = setsockopt(sockFd,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int));
+    ERROR_CHECK(ret,-1,"setsockopt");
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(atoi(argv[2]));
+    addr.sin_addr.s_addr = inet_addr(argv[1]);
+    ret = bind(sockFd,(struct sockaddr *)&addr,sizeof(addr));
+    ERROR_CHECK(ret,-1,"bind");
+    ret = listen(sockFd,10);
+    ERROR_CHECK(ret,-1,"listen");
+    int netFd = accept(sockFd,NULL,NULL);
+    ERROR_CHECK(netFd,-1,"accept");
+    int epfd = epoll_create(1);
+    ERROR_CHECK(epfd,-1,"epoll_create");
+    struct epoll_event event;
+    event.data.fd = STDERR_FILENO;
+    event.events = EPOLLIN; 
+    epoll_ctl(epfd,EPOLL_CTL_ADD,STDIN_FILENO,&event);
+    event.data.fd = netFd;
+    event.events = EPOLLIN;
+    epoll_ctl(epfd,EPOLL_CTL_ADD,netFd,&event);
+    char buf[4096] = {0};
+    struct epoll_event readyArr[2];
+    while(1) {
+        int readyNum = epoll_wait(epfd,readyArr,2,-1);
+        for(int i =0; i < readyNum; ++i) {
+            if(readyArr[i].data.fd == STDERR_FILENO) {
+                bzero(buf,sizeof(buf));
+                int ret = read(STDERR_FILENO,buf,sizeof(buf));
+                if(ret == 0) {
+                    goto end;
+                }
+                send(netFd,buf,strlen(buf),0);
+            }
+            else if(readyArr[i].data.fd == netFd) {
+                bzero(buf,sizeof(buf));
+                int ret = recv(netFd,buf,sizeof(buf),0);
+                if(ret == 0) {
+                    goto end;
+                }
+                puts(buf);
+            }
+        }
+    }
+end:
+    close(epfd);
+    close(netFd);
+    close(sockFd);
+}
+```
 ## 使用 epoll 关闭长期不发消息的连接
+和select 一样， epoll 也可以监听已连接队列，判断accept 是否就绪。配合上超时机制，可以用来实现自动断开功能：超过一段时间未发送消息的客户端的TCP连接会被服务端主动关闭。
+```c
+int isConnected = 0;
+time_t lastMsg,check;
+while(1) {
+    int readyNum = epoll_wait(epfd,readyArr,3,1000);
+    puts("epoll_wait returns");
+    if(readyNum ==0 && isConnected != 0) {
+        puts("time out");
+        check = time(NULL);
+        if(check - lastMsg > 5) {
+            send(netFd,"You are free",12,0);
+            close(netFd);
+            event.data.fd = netFd;
+            event.events = EPOLLIN;
+            epoll_ctl(epfd,EPOLL_CTL_DEL,netFd,&event);
+            isConnected = 0;
+        }
+    }
+    for(int i =0; i < readyNum; ++i) {
+        if(readyArr[i].data.fd == STDERR_FILENO) {
+            if(isConnected == 0) {
+                int ret = read(STDERR_FILENO,buf,sizeof(buf));
+                if(ret == 0) {
+                    goto end;
+                }
+            }
+            bzero(buf,sizeof(buf));
+            int ret = read(STDERR_FILENO,buf,sizeof(buf));
+            if(ret == 0) {
+                goto end;
+            }
+            send(netFd,buf,strlen(buf),0);
+        }
+        else if(readyArr[i].data.fd == sockFd) {
+            if(isConnected != 0){
+                int nofd = accept(sockFd,NULL,NULL);
+                close(nofd);
+                continue;
+            }
+            netFd = accept(sockFd,NULL,NULL);
+            ERROR_CHECK(netFd,-1,"accept");
+            event.data.fd = netFd;
+            event.events = EPOLLIN;
+            epoll_ctl(epfd,EPOLL_CTL_ADD,netFd,&event);
+            isConnected = 1;
+            lastMsg = time(NULL);
+        }
+        else if(readyArr[i].data.fd == netFd) {
+            bzero(buf,sizeof(buf));
+            int ret = recv(netFd,buf,sizeof(buf),0);
+            if(ret == 0) {
+                close(netFd);
+                event.data.fd = netFd;
+                event.events = EPOLLIN;
+                epoll_ctl(epfd,EPOLL_CTL_DEL,netFd,&event);
+                isConnected = 0;
+            }
+            lastMsg = time(NULL);
+            puts(buf);
+        }
+    }
+}
+```
 
 ## 非阻塞读操作
+![](img/2023-11-05-22-10-44.png)
+
+之前所了解的读( read )操作都是阻塞的，即调用该函数时，如果硬件没有将数据拷贝到内核缓冲区当中时，线程会主动陷入阻塞。
+
+使用fcntl 函数可以将已打开文件增加一个非阻塞选项。
+int fcntl(int fd, int cmd, ... /* arg */ );
+//cmd F_GETFL 获取状态作为返回值
+//cmd F_SETFL arg STATUS 将文件状态设置为新状态
+![](img/2023-11-05-22-13-51.png)
 
 ## epoll 的边缘触发
+epoll_wait 的就绪触发有两种方式：一种是默认的水平触发方式(Level-triggered)，另一种是边缘触发模式(Edge-triggered)。
+
+水平触发模式下，只要缓冲区当中存在数据，就可以使epoll_wait 就绪；
+在边缘触发的情况下，只有缓冲区的数据增多的时候，才能使epoll_wait 就绪。
+
+![](img/2023-11-05-22-33-05.png)
+
 
 # 6 socket 属性调整
 
