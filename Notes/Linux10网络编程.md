@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
 ## socket
 socket 函数用于创建一个socket 设备。调用该函数时需要指定通信的协议域、套接字类型和协议类型。
 socket 函数的返回值是一个非负整数，就是指向内核socket 设备的文件描述符。
+每个连接的一端在内核中都对应了一个输入缓冲区(SO_RCVBUF)和一个输出缓冲区(SO_SNDBUF)
 ```c
 #include <sys/socket.h>
 int socket(int domain, int type, int protocol);
@@ -123,7 +124,7 @@ int main() {
 客户端使用connect 来建立和TCP服务端的连接。
 
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-
+调用connect 预期是完成TCP建立连接的三次握手。
 ![](img/2023-10-17-14-49-16.png)
 
 ```c
@@ -152,6 +153,7 @@ int main(int argc, char *argv[]) {
 bind 函数用于给套接字赋予一个本地协议地址（即IP地址加端口号）。
 
 int bind(int sockfd, const struct sockaddr *addr,socklen_t addrlen);
+使用bind 函数时要注意其地址是大端法描述的，并且可能需要执行强制类型转换。
 
 ## listen
 使TCP服务端开启监听。服务端在开启了listen 之后，就可以开始接受客户端连接了。
@@ -645,7 +647,62 @@ epoll_wait 的就绪触发有两种方式：一种是默认的水平触发方式
 
 ![](img/2023-11-05-22-33-05.png)
 
+```c
+event.data.fd = netFd;
+//event.events = EPOLLIN;
+event.events = EPOLLIN|EPOLLET;
+epoll_ctl(epfd,EPOLL_CTL_ADD,netFd,&event);
+char buf[5] = {0};
+struct epoll_event readyArr[2];
+while(1) {
+    int readyNum = epoll_wait(epfd,readyArr,2,-1);
+    for(int i =0; i < readyNum; ++i) {
+        if(readyArr[i].data.fd == STDERR_FILENO) {
+            bzero(buf,sizeof(buf));
+            int ret = read(STDERR_FILENO,buf,sizeof(buf)-1);
+            if(ret == 0) {
+                goto end;
+            }
+            send(netFd,buf,strlen(buf),0);
+        }
+        else if(readyArr[i].data.fd == netFd) {
+            // bzero(buf,sizeof(buf));
+            // int ret = recv(netFd,buf,sizeof(buf)-1,0);
+            // if(ret == 0) {
+            //     goto end;
+            // }
+            // puts(buf);
+            int ret;
+            while(1){
+                bzero(buf,sizeof(buf));
+                ret = recv(netFd,buf,sizeof(buf)-1,0);
+                puts(buf);
+                if(ret == 0 || ret == -1){
+                    break;
+                }
+            }
+        }
+    }
+}
+```
 
 # 6 socket 属性调整
+使用函数setsocketopt 可以调整套接字的属性
+![](img/2023-11-07-14-16-29.png)
+```c
+int setsockopt(int sockfd, int level, int optname,
+const void *optval, socklen_t optlen);
+int getsockopt(int sockfd, int level, int optname,
+void *optval, socklen_t *optlen);
+```
+* SO_RCVBUF和SO_SNDBUF：用来获取和调整接收/发送缓冲区的大小。
+* SO_RCVLOWAT和SO_SNDLOWAT：说明缓冲区的下限，如果缓冲区的字节少于下限，那么数据就不会从套接字中传递给内核协议栈或者发送给用户。
 
 # 7 recv 和 send 的标志  
+MSG_DONTWAIT
+recv 的标志可以在不修改已连接套接字的文件属性的情况下，把单个IO操作临时指定为非阻塞。
+ret = recv(netFd,buf,sizeof(buf),MSG_DONTWAIT);
+
+MSG_PEEK
+recv 的MSG_PEEK选项可以允许看到已经到达缓冲区的数据而不将其从缓冲区当中取出。
+ret = recv(newFd,buf,sizeof(buf),MSG_PEEK);
