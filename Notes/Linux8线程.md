@@ -42,7 +42,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_r
 * start_routine 是一个函数指针类型的参数。地位相当于主线程的 main ,作为线程执行的入口函数。
 * arg 是传递给start_routine 的参数。
 
-不同线程都拥有自己独立唯一的线程id，NPTL使用pthread_t类型来保存线程id，了linux里是一个无符号长整型数。使用函数 pthread_self 可以获取本线程的id。
+不同线程都拥有自己独立唯一的线程id，NPTL使用pthread_t类型来保存线程id，linux里是一个无符号长整型数。使用函数 pthread_self 可以获取本线程的id。
 
 ![](img/2023-10-06-16-02-19.png)
 
@@ -140,7 +140,7 @@ push和pop，必须在同一作用域中成对出现。
 
 可以使用pthread_mutexattr_settype 函数修改锁的属性。
 检错锁在重复加锁时报错
-递归锁/可重入锁在重复加锁不会死锁时，只是会增加锁的引用计数，解锁时也只是减少锁的引用计数。
+递归锁/可重入锁在重复加锁时不会死锁，只是会增加锁的引用计数，解锁时也只是减少锁的引用计数。
 
 但是在实际工作中，如果一个设计必须依赖于递归锁，那么这个设计肯定是有问题的。
 
