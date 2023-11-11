@@ -46,7 +46,7 @@ ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 使用sendmsg 和recvmsg 的时候附加一个消息头部，即一个struct msghdr 类型的结构体。
 首先，需要将要传递的内容存储入msg_iov 当中，在这里需要注意的是，元素类型为struct iovec 的数组可以存储一组离散的消息，只需要将每个消息的起始地址和本消息的长度存入数组元素中即可。
 接下来，需要将文件描述符的信息存入控制字段msg_control 中，这个我们需要存储一个地址值，该地址指向了一个struct cmsghdr 类型的控制信息。
-
+为了传递文件描述符，需要将结构体中的cmsg_level 字段设置为SOL_SOCKET ，而 cmsg_type 字段需要设置为SCM_RIGHTS ，再将数据部分设置为文件描述符。这样，该文件描述符所指的文件对象就可以传递到另一个进程了。
 ![](img/2023-11-09-22-08-12.png)
 
 ![](img/2023-11-09-22-08-36.png)
