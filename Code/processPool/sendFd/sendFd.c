@@ -10,7 +10,7 @@ int sendFd(int pipeFd, int fdToSend){
         hdr.msg_iov = iov;
         hdr.msg_iovlen = 1;
         // 传递控制信息
-        struct cmsghdr *pcmsghdr = (struct cmsghdr *)calloc(1,sizeof(struct cmsghdr));
+        struct cmsghdr *pcmsghdr = (struct cmsghdr *)calloc(1,CMSG_LEN(sizeof(int)));
         pcmsghdr->cmsg_len = CMSG_LEN(sizeof(int)); // 要承载的信息是一个整型数据
         pcmsghdr->cmsg_level = SOL_SOCKET;
         pcmsghdr->cmsg_type = SCM_RIGHTS;
@@ -32,7 +32,7 @@ int recvFd(int pipeFd, int *pFdToRecv){
         hdr.msg_iov = iov;
         hdr.msg_iovlen = 1;
         // 传递控制信息
-        struct cmsghdr *pcmsghdr = (struct cmsghdr *)calloc(1,sizeof(struct cmsghdr));
+        struct cmsghdr *pcmsghdr = (struct cmsghdr *)calloc(1,CMSG_LEN(sizeof(int)));
         pcmsghdr->cmsg_len = CMSG_LEN(sizeof(int));
         pcmsghdr->cmsg_level = SOL_SOCKET;
         pcmsghdr->cmsg_type = SCM_RIGHTS;

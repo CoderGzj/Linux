@@ -1,4 +1,5 @@
 #include "worker.h"
+#include "head.h"
 int makeChild(workerData_t *workerArr, int workerNum){
     pid_t pid;
     int pipeFd[2];
@@ -12,7 +13,7 @@ int makeChild(workerData_t *workerArr, int workerNum){
         }
         //父进程
         close(pipeFd[1]);
-        printf("pipeFd = %d, pi = %d\n",pipeFd[0],pid);
+        printf("pipeFd = %d, pid = %d\n",pipeFd[0],pid);
         workerArr[i].pipeFd = pipeFd[0];
         workerArr[i].pid = pid;
         workerArr[i].status = FREE;
@@ -24,8 +25,7 @@ int eventHanler(int pipeFd){
         recvFd(pipeFd,&netFd);
         // 后续任务加在这里
         printf("I got task!\n");
-        // done
-        sleep(30);
+        transFile(netFd);
         printf("I have done this task!\n");
         pid_t pid = getpid();
         write(pipeFd,&pid,sizeof(pid));
