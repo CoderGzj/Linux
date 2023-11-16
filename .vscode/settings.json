@@ -3,8 +3,6 @@
         "myself.h": "c",
         "stdlib.h": "c",
         "select.h": "c"
-    }
-        "myself.h": "c"
     },
     "pasteImage.basePath": "${currentFileDir}",
     "pasteImage.path": "${currentFileDir}/img",
