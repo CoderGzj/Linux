@@ -12,12 +12,21 @@ int transFile(int netFd){
     train.length = 4; // 车厢是4个字节 int
     int fileSize = statbuf.st_size; // 长度转换成 int
     memcpy(train.buf,&fileSize,sizeof(int)); // int 存入小火车
-    send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
-
+    ret = send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
     char *p = (char *)mmap(NULL,statbuf.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
     ERROR_CHECK(p,MAP_FAILED,"mmap");
-    send(netFd,p,fileSize,MSG_NOSIGNAL);
-    
+    int total = 0;
+    while(total < fileSize){
+        if(fileSize - total < sizeof(train.buf)){
+            train.length = fileSize - total;
+        }
+        else{
+            train.length = sizeof(train.buf);
+        }
+        memcpy(train.buf,p+total,train.length);
+        send(netFd,&train,train.length + sizeof(train.length),MSG_NOSIGNAL);
+        total += train.length;
+    }
     train.length = 0;
     ret = send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
     close(fd);
