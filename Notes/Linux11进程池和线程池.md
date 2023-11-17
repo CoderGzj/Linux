@@ -190,6 +190,7 @@ int main(int argc, char *argv[]) {
     close(sockFd);
 }
 ```
+
 ## 4.2 服务端
 ```c
 // main.c
@@ -396,7 +397,16 @@ int transFile(int netFd){
 ## 5.1 进度条显示
 首先服务端需要传输一个文件的大小给客户端，以便客户端计算百分比。客户端也需要先接收一个长度的小火车，再读取文件内容，在显示的时候需要控制换行的显示，可以使用fflush 清空缓冲区。
 ```c
-    // ......
+    // 服务端 发送文件大小
+    struct stat statbuf;
+    ret = fstat(fd,&statbuf);
+    ERROR_CHECK(ret,-1,"fstat");
+    train.length = 4; // 车厢是4个字节 int
+    int fileSize = statbuf.st_size; // 长度转换成 int
+    memcpy(train.buf,&fileSize,sizeof(int)); // int 存入小火车
+    ret = send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
+    
+    // 客户端 进度条
     int fileSize = 0;
     recvn(sockFd,&dataLength,sizeof(int));
     recvn(sockFd,&fileSize,dataLength);
