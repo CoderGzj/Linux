@@ -27,19 +27,29 @@ int recvFile(int sockFd){
     recvn(sockFd,&fileSize,dataLength);
     printf("fileSize = %d\n",fileSize);
     char buf[1000] = {0};
-    time_t timeBeg,timeEnd;
-    timeBeg = time(NULL);
-
-    ftruncate(fd,fileSize);
-    char *p = (char *)mmap(p,fileSize,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
-    ERROR_CHECK(p,MAP_FAILED,"mmap");
-    recvn(sockFd,p,fileSize);
-
-    recvn(sockFd,&dataLength,sizeof(int));
-    printf("dataLength = %d\n", dataLength);
-    timeEnd = time(NULL);
-    printf("total time = %ld\n",timeBeg - timeEnd);
-    munmap(p,fileSize);
+    int doneSize = 0;
+    int lastSize = 0;
+    int slice = fileSize/10000;
+    while(1){
+        ret = recvn(sockFd,&dataLength,sizeof(int));
+        ERROR_CHECK(ret,-1,"recv");
+        if(dataLength != 1000){
+            printf("dataLength = %d\n", dataLength);
+        }
+        doneSize += dataLength;
+        if(doneSize - lastSize > slice){
+            printf("%5.2lf%%\r",100.0*doneSize/fileSize);
+            fflush(stdout);
+            lastSize = doneSize;
+        }
+        if(dataLength == 0){
+            printf("100.00%%\n");
+            break;
+        }
+        ret = recvn(sockFd,buf,dataLength);
+        ERROR_CHECK(ret,-1,"recv");
+        write(fd,buf,dataLength);
+    }
 }
 int main(int argc, char *argv[]) {
     // ./cilent 192.168.227.131 1234
