@@ -467,6 +467,16 @@ int transFile(int netFd){
 ```
 ![](img/2023-11-16-18-32-37.png)
 
+使用mmap只能减少数据从磁盘文件对象到用户态空间的拷贝，但是依然无法避免从用户态到内核已连接套接字的拷贝（因为网络设备文件对象不支持mmap ）。
+sendfile 系统调用可以解决这个问题，它可以使数据直接在内核中传递而不需要经过用户态空间。
+![](img/2023-11-18-23-52-31.png)
+```c
+#include <sys/sendfile.h>
+ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
+```
+sendfile 只能用于发送文件方的零拷贝实现，无法用于接收方，并且发送文件的大小上限是2GB。
+
+
 ## 5.3 进程池的退出
 
 # 6 线程池的实现
