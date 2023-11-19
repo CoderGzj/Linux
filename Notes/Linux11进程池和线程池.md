@@ -476,6 +476,11 @@ ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
 ```
 sendfile 只能用于发送文件方的零拷贝实现，无法用于接收方，并且发送文件的大小上限是2GB。
 
+sendfile(netFd,fd,NULL,fileSize);
+
+考虑到sendfile 只能将数据从磁盘文件发送到网络设备中，那么接收方如何在避免使用mmap 的情况下使用零拷贝技术呢？
+一种方式就是采用管道配合splice 的做法。splice 系统调用可以直接将数据从内核管道文件缓冲区发送到另一个内核文件缓冲区。
+![](img/2023-11-19-23-30-32.png)
 
 ## 5.3 进程池的退出
 
