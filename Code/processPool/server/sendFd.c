@@ -1,12 +1,11 @@
 #include <myself.h>
-int sendFd(int pipeFd, int fdToSend){
+int sendFd(int pipeFd, int fdToSend, int exitFlag){
         struct msghdr hdr;
         bzero(&hdr,sizeof(hdr));
         // 传递文本
         struct iovec iov[1]; //长度为1时，离散数据退化为连续
-        char buf[10] = "hello";
-        iov[0].iov_base = buf;
-        iov[0].iov_len = 5;
+        iov[0].iov_base = &exitFlag;
+        iov[0].iov_len = sizeof(int);
         hdr.msg_iov = iov;
         hdr.msg_iovlen = 1;
         // 传递控制信息
@@ -21,14 +20,13 @@ int sendFd(int pipeFd, int fdToSend){
         ERROR_CHECK(ret,-1,"sendmsg");
         return 0;
 }
-int recvFd(int pipeFd, int *pFdToRecv){
+int recvFd(int pipeFd, int *pFdToRecv, int *pExitFlag){
         struct msghdr hdr;
         bzero(&hdr,sizeof(hdr));
         // 传递文本
         struct iovec iov[1]; // 长度为1时，离散数据退化为连续
-        char buf[10] = {0};
-        iov[0].iov_base = buf;
-        iov[0].iov_len = sizeof(buf); //无论什么情况不要写0
+        iov[0].iov_base = pExitFlag;
+        iov[0].iov_len = sizeof(int); //无论什么情况不要写0
         hdr.msg_iov = iov;
         hdr.msg_iovlen = 1;
         // 传递控制信息

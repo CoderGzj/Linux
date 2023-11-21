@@ -22,7 +22,12 @@ int makeChild(workerData_t *workerArr, int workerNum){
 int eventHanler(int pipeFd){
     while(1){
         int netFd;
-        recvFd(pipeFd,&netFd);
+        int exitFlag;
+        recvFd(pipeFd,&netFd,&exitFlag);
+        if(exitFlag == 1){
+            puts("I am going to die!\n");
+            exit(0);
+        }
         // 后续任务加在这里
         printf("I got task!\n");
         transFile(netFd);
@@ -31,4 +36,4 @@ int eventHanler(int pipeFd){
         write(pipeFd,&pid,sizeof(pid));
         close(netFd);
     }
-}
+} 
