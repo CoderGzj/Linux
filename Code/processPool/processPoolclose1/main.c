@@ -1,21 +1,26 @@
 #include "worker.h"
 #include "head.h"
-int exitPipe[2];
-int exitFlag;
+int workerNum;
+workerData_t *workerArr;
 void sigFunc(int signum){
     printf("signum = %d\n", signum);
-    write(exitPipe[1],"1",1);
+    for(int i = 0; i < workerNum; ++i){
+        kill(workerArr[i].pid,SIGUSR1);
+    }
+    for(int i = 0; i < workerNum; ++i){
+        wait(NULL);
+    }
+    puts("process pool is over!");
+    exit(0);
 }
 int main(int argc, char *argv[]){
     //./server 192.168.227.131 1234 3
     // 创建很多子进程
-    int workerNum = atoi(argv[3]);
-    workerData_t *workerArr = (workerData_t *)calloc(workerNum,sizeof(workerData_t));
+    workerNum = atoi(argv[3]);
+    workerArr = (workerData_t *)calloc(workerNum,sizeof(workerData_t));
     makeChild(workerArr,workerNum);
-    // 父进程要注册信号
+    // 父进程要注册新号
     signal(SIGUSR1,sigFunc);
-    pipe(exitPipe);
-
     // 初始化tcp连接
     int sockFd;
     tcpInit(&sockFd,argv[1],argv[2]);
@@ -23,7 +28,6 @@ int main(int argc, char *argv[]){
     // 用epoll把tcp连接和子进程管理起来
     int epfd = epoll_create(1);
     epollAdd(sockFd,epfd);
-    epollAdd(exitPipe[0],epfd);
     for(int i = 0; i < workerNum; ++i){
         epollAdd(workerArr[i].pipeFd,epfd);       
     }
@@ -40,24 +44,12 @@ int main(int argc, char *argv[]){
                 for(int j = 0; j < workerNum; ++j){
                     if(workerArr[j].status == FREE){
                         printf("%d worker got a job, pid = %d",j,workerArr[j].pid);
-                        sendFd(workerArr[j].pipeFd,netFd,exitFlag); // 把网络连接交给子进程
+                        sendFd(workerArr[j].pipeFd,netFd); // 把网络连接交给子进程
                         close(netFd);
                         workerArr[j].status = BUSY;
                         break;
                     }
                 }
-            }
-            else if(readyArr[i].data.fd == exitPipe[0]){
-                printf("process pool is going to exit!\n");
-                exitFlag = 1;
-                for(int j = 0; j < workerNum; ++j){
-                    sendFd(workerArr[j].pipeFd,0,exitFlag);
-                }
-                for(int j = 0; j < workerNum; ++j){
-                    wait(NULL);
-                }
-                printf("process pool exits!\n");
-                exit(0);
             }
             else{
                 puts("one worker finishes his job!\n");
