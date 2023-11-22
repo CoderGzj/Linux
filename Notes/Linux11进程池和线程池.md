@@ -483,6 +483,95 @@ sendfile(netFd,fd,NULL,fileSize);
 ![](img/2023-11-19-23-30-32.png)
 
 ## 5.3 进程池的退出
+### 进程池的简单退出
+父进程收到信号之后，再给每个子进程发送信号使其终止，要父进程在一个目标信号（通常是10信号SIGUSR1 ）的过程给目标子进程发送信号即可。
+因为父进程会修改默认递送行为，而子进程会执行默认行为，所以fork 应该要在signal 的后面调用。
 
+### 使用管道通知工作进程终止
+采用信号就不可避免要使用全局变量。一种解决方案就是采取“异步拉起同步”的策略：虽然还是需要创建一个管道全局变量，但是该管道只用于处理进程池退出，不涉及其他的进程属性。
+这个管道的读端需要使用IO多路复用机制管理起来，而当信号产生之后，主进程递送信号的时候会往管道中写入数据，此时可以依靠epoll 的就绪事件，在事件处理中来完成退出的逻辑。
+
+### **进程池的优雅退出**
+![](img/2023-11-22-16-36-23.png)
+
+之前的退出机制存在一个问题，就是即使工作进程正在传输文件中，父进程也会通过信号将其终止。如何实现进程池在退出的时候，子进程要完成传输文件的工作之后才能退出呢？
+一种方案是使用sigprocmask 在文件传输的过程中设置信号屏蔽字
+另一种方案就是调整sendFd 的设计，用户发送信号给父进程表明将要退出进程池；随后父进程通过sendFd给所有的工作进程发送终止的信息，工作进程在完成了一次工作任务了之后就会recvFd 收到进程池终止的信息，然后工作进程就可以主动退出；随着所有的工作进程终止，父进程亦随后终止，整个进程池就终止了。
+```c
+int sendFd(int pipeFd, int fdToSend, int exitFlag){
+    struct msghdr hdr;
+    bzero(&hdr,sizeof(struct msghdr));
+    struct iovec iov[1];
+    iov[0].iov_base = &exitFlag;
+    iov[0].iov_len = sizeof(int);
+    hdr.msg_iov = iov;
+    hdr.msg_iovlen = 1;
+    //...
+}
+int recvFd(int pipeFd, int *pFd, int *exitFlag){
+    struct msghdr hdr;
+    bzero(&hdr,sizeof(struct msghdr));
+    struct iovec iov[1];
+    iov[0].iov_base = exitFlag;
+    iov[0].iov_len = sizeof(int);
+    hdr.msg_iov = iov;
+    hdr.msg_iovlen = 1;
+    //.....
+}
+void handleEvent(int pipeFd)
+{
+    int netFd;
+    while(1){
+        int exitFlag;
+        recvFd(pipeFd,&netFd,&exitFlag);
+        if(exitFlag == 1){
+            puts("I am closing!");
+            exit(0);
+        }
+        //...
+    }
+}
+//... epoll
+    for(int i = 0;i < readynum; ++i){
+        if(readylist[i].data.fd == sockFd){
+            puts("accept ready");
+            int netFd = accept(sockFd,NULL,NULL);
+            for(int j = 0;j < workerNum; ++j){
+                if(workerList[j].status == FREE){
+                    printf("No. %d worker gets his job, pid = %d\n", j,
+                    workerList[j].pid);
+                    sendFd(workerList[j].pipeFd, netFd, 0);
+                    workerList[j].status = BUSY;
+                    break;
+                }
+            }
+            close(netFd);
+        }
+        else if(readylist[i].data.fd == exitpipeFd[0]){
+            for(int j = 0; j < workerNum; ++j){
+                puts("set exitFlag to worker!");
+                sendFd(workerList[j].pipeFd,0,1);
+            }
+            for(int j = 0; j < workerNum; ++j){
+                wait(NULL);
+            }
+            printf("Parent process exit!\n");
+            exit(0);
+        }
+//....
+```
 
 # 6 线程池的实现
+## 从进程池到线程池
+使用进程池的思路来解决并发连接是一种经典的基于事件驱动模型的解决方案，但是进程天生具有隔离性，导致进程之间通信十分困难，一种优化的思路就是用线程来取代进程，即所谓的线程池。
+由于多线程是共享地址空间的，所以主线程和工作线程天然地通过共享文件描述符数值的形式共享网络文件对象，但是这种共享也会带来麻烦：每当有客户端发起请求时，主线程会分配一个空闲的工作线程完成任务，而任务正是在多个线程之间共享的资源，所以需要采用一定的互斥和同步的机制来避免竞争。
+
+可以将任务设计成一个队列，任务队列就成为多个线程同时访问的共享资源，此时问题就转化成了一个典型的生产者-消费者问题：任务队列中的任务就是商品，主线程是生产者，每当有连接到来的时候，就将一个任务放入任务队列，即生产商品，而各个工作线程就是消费者，每当队列中任务到来的时候，就负责取出任务并执行。
+
+![](img/2023-11-22-21-29-04.png)
+
+## 线程池的退出
+### 简单退出
+引入多进程机制：将进程池改造成一个父进程和一个子进程组成的应用程序。其中父进程负责递送信号，而子进程负责创建和运行进程池，父子进程之间通过管道通信。
+
+### 优雅退出
