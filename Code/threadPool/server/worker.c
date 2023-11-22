@@ -1,17 +1,26 @@
 #include "threadPool.h"
+void cleanFunc(void *arg){
+    threadPool_t *pThreadPool = (threadPool_t *)arg;
+    pthread_mutex_unlock(&pThreadPool->taskQueue.mutex);
+}
 void * handleEvent(void *arg){
     threadPool_t * pThreadPool= (threadPool_t *)arg;
     int netFd;
     while(1){
         printf("I am free! tid = %lu\n", pthread_self());
         pthread_mutex_lock(&pThreadPool->taskQueue.mutex);
-        while(pThreadPool->taskQueue.size == 0){
+        pthread_cleanup_push(cleanFunc,(void *)pThreadPool);
+        while(pThreadPool->taskQueue.size == 0 && pThreadPool->exitFlag == 0){
             pthread_cond_wait(&pThreadPool->taskQueue.cond,&pThreadPool->taskQueue.mutex);   
+        }
+        if(pThreadPool->exitFlag != 0){
+            printf("I am going to die child thread!\n");
+            pthread_exit(NULL);
         }
         // 子线程苏醒
         netFd = pThreadPool->taskQueue.pFront->netFd;
         taskDeQueue(&pThreadPool->taskQueue);
-        pthread_mutex_unlock(&pThreadPool->taskQueue.mutex);
+        pthread_cleanup_pop(1);
         printf("I am working! tid = %lu\n", pthread_self());
         transFile(netFd);
         printf("done\n");

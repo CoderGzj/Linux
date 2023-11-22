@@ -30,16 +30,20 @@ int recvFile(int sockFd){
     time_t timeBeg,timeEnd;
     timeBeg = time(NULL);
 
-    ftruncate(fd,fileSize);
-    char *p = (char *)mmap(p,fileSize,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
-    ERROR_CHECK(p,MAP_FAILED,"mmap");
-    recvn(sockFd,p,fileSize);
+    int pipefds[2];
+    pipe(pipefds);
+    int total = 0;
+    while(total < fileSize){
+        int ret = splice(sockFd,NULL,pipefds[1],NULL,4096,SPLICE_F_MORE);
+        total += ret;
+        usleep(10000);
+        splice(pipefds[0],NULL,fd,NULL,ret,SPLICE_F_MORE);
+    }
 
     recvn(sockFd,&dataLength,sizeof(int));
     printf("dataLength = %d\n", dataLength);
     timeEnd = time(NULL);
-    printf("total time = %ld\n",timeBeg - timeEnd);
-    munmap(p,fileSize);
+    printf("total time = %ld\n",timeEnd - timeBeg);
 }
 int main(int argc, char *argv[]) {
     // ./cilent 192.168.227.131 1234

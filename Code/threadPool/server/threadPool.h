@@ -14,6 +14,7 @@ typedef struct threadPool_s{
     pthread_t *tid; // 子线程数组
     int threadNum; // 子线程数量
     taskQueue_t taskQueue; // 任务队列
+    int exitFlag;
 }threadPool_t;
 int taskEnQueue(taskQueue_t *pTaskQueue, int netFd);
 int taskDeQueue(taskQueue_t *pTaskQueue);
