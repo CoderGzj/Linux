@@ -582,3 +582,288 @@ void handleEvent(int pipeFd)
 ### 优雅退出
 如果使用pthread_cancel ，由于读写文件的函数是取消点，那么正在工作线程也会被终止，从而导致正在执行的下载任务无法完成。
 不使用pthread_cancel ，而是让每个工作线程在事件循环开始的时候，检查一下线程池是否处于终止的状态，这样子线程就会等待当前任务执行完成了之后才会终止。
+
+## 完整代码
+```c
+// threadPool.h
+#include <myself.h>
+typedef struct task_s{
+    int netFd; // 传递文件描述符
+    struct task_s *pNext;
+}task_t;
+typedef struct taskQueue_s{
+    task_t *pFront; // 队首指针
+    task_t *pRear; // 队尾指针
+    int size; // 队列现在的长度
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+}taskQueue_t;
+typedef struct threadPool_s{
+    pthread_t *tid; // 子线程数组
+    int threadNum; // 子线程数量
+    taskQueue_t taskQueue; // 任务队列
+    int exitFlag;
+}threadPool_t;
+int taskEnQueue(taskQueue_t *pTaskQueue, int netFd);
+int taskDeQueue(taskQueue_t *pTaskQueue);
+int threadPoolInit(threadPool_t *pThreadPool, int workerNum);
+int makeWorker(threadPool_t *pThreadPool);
+int tcpInit(int *pSockFd, char *ip, char *port);
+int epollAdd(int fd, int epfd);
+int epollDel(int fd, int epfd);
+int transFile(int netFd);
+typedef struct train_s{
+    int length;
+    char buf[1000];
+}train_t;
+
+// main.c
+#include <myself.h>
+#include "threadPool.h"
+int exitPipe[2];
+void sigFunc(int signum){
+    printf("signum = %d\n", signum);
+    write(exitPipe[1],"1",1);
+    printf("Parent process is going to die!\n");
+}
+int main(int argc, char *argv[]){
+    // ./server 192.168.227.131 1234 3
+    ARGS_CHECK(argc,4);
+    pipe (exitPipe);
+    if(fork() != 0){ // 父进程 先注册一个信号，然后等待子进程终止，最后自己终止
+        close(exitPipe[0]);
+        signal(SIGUSR1,sigFunc);
+        wait(NULL);
+        exit(0);
+    }
+    close(exitPipe[1]);
+    int workerNum = atoi(argv[3]);
+    threadPool_t threadPool; // 为线程池的任务队列、子线程的tid申请内存
+    threadPoolInit(&threadPool,workerNum); // 初始化内存
+    makeWorker(&threadPool); // 创建若干子线程
+    int sockFd;
+    tcpInit(&sockFd,argv[1],argv[2]); // 主线程要初始化tcp连接
+    int epfd = epoll_create(1);
+    epollAdd(sockFd,epfd); // 用epoll把sockFd监听起来
+    epollAdd(exitPipe[0],epfd);
+    struct epoll_event readyArr[2];
+    while(1){
+        int readyNum = epoll_wait(epfd,readyArr,2,-1);
+        puts("epoll_wait returns");
+        for(int i = 0; i < readyNum; ++i){
+            if(readyArr[i].data.fd == sockFd){
+                // 说明客户端有新的连接到来
+                int netFd = accept(sockFd,NULL,NULL);
+                // 先加锁
+                pthread_mutex_lock(&threadPool.taskQueue.mutex);
+                taskEnQueue(&threadPool.taskQueue,netFd); // 生产一个任务
+                printf("New task!\n");
+                pthread_cond_signal(&threadPool.taskQueue.cond); // 通知处于唤醒队列的子线程
+                pthread_mutex_unlock(&threadPool.taskQueue.mutex);
+            }
+            else if(readyArr[i].data.fd == exitPipe[0]){
+                printf("child process, threadPool is going to die!\n");
+                threadPool.exitFlag = 1;
+                pthread_cond_broadcast(&threadPool.taskQueue.cond);
+                for(int j = 0; j < workerNum; ++j){
+                    pthread_join(threadPool.tid[j],NULL);
+                }
+                pthread_exit(NULL);
+            }
+        }
+    }
+}
+int threadPoolInit(threadPool_t *pThreadPool, int workerNum){
+    pThreadPool->threadNum = workerNum;
+    pThreadPool->tid = (pthread_t *)calloc(workerNum,sizeof(pthread_t));
+    pThreadPool->taskQueue.pFront = NULL;
+    pThreadPool->taskQueue.pRear = NULL;
+    pThreadPool->taskQueue.size = 0;
+    pthread_mutex_init(&pThreadPool->taskQueue.mutex,NULL);
+    pthread_cond_init(&pThreadPool->taskQueue.cond,NULL);
+    pThreadPool->exitFlag = 0;
+}
+
+// worker.c
+#include "threadPool.h"
+void cleanFunc(void *arg){
+    threadPool_t *pThreadPool = (threadPool_t *)arg;
+    pthread_mutex_unlock(&pThreadPool->taskQueue.mutex);
+}
+void * handleEvent(void *arg){
+    threadPool_t * pThreadPool= (threadPool_t *)arg;
+    int netFd;
+    while(1){
+        printf("I am free! tid = %lu\n", pthread_self());
+        pthread_mutex_lock(&pThreadPool->taskQueue.mutex);
+        pthread_cleanup_push(cleanFunc,(void *)pThreadPool);
+        while(pThreadPool->taskQueue.size == 0 && pThreadPool->exitFlag == 0){
+            pthread_cond_wait(&pThreadPool->taskQueue.cond,&pThreadPool->taskQueue.mutex);   
+        }
+        if(pThreadPool->exitFlag != 0){
+            printf("I am going to die child thread!\n");
+            pthread_exit(NULL);
+        }
+        // 子线程苏醒
+        netFd = pThreadPool->taskQueue.pFront->netFd;
+        taskDeQueue(&pThreadPool->taskQueue);
+        pthread_cleanup_pop(1);
+        printf("I am working! tid = %lu\n", pthread_self());
+        transFile(netFd);
+        printf("done\n");
+        close(netFd);
+    }
+}
+int makeWorker(threadPool_t *pThreadPool){
+    for(int i = 0; i < pThreadPool->threadNum; ++i){
+        pthread_create(&pThreadPool->tid[i],NULL,handleEvent,(void *)pThreadPool);
+    }
+}
+
+// epollFunc.c
+#include "threadPool.h"
+int epollAdd(int fd, int epfd){
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = fd;
+    int ret = epoll_ctl(epfd,EPOLL_CTL_ADD,fd,&event);
+    ERROR_CHECK(ret,-1,"epoll_ctl");
+    return 0;
+}
+int epollDel(int fd, int epfd){
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = fd;
+    int ret = epoll_ctl(epfd,EPOLL_CTL_DEL,fd,&event);
+    ERROR_CHECK(ret,-1,"epoll_ctl");
+    return 0;
+}
+
+// taskQueue.c
+#include "threadPool.h"
+int taskEnQueue(taskQueue_t *pTaskQueue, int netFd){ // 入队
+    task_t *pTask = (task_t *)calloc(1,sizeof(task_t));
+    pTask->netFd = netFd;
+    if(pTaskQueue->size == 0){
+        pTaskQueue->pFront = pTask;
+        pTaskQueue->pRear = pTask;
+    }
+    else{
+        pTaskQueue->pRear->pNext = pTask;
+        pTaskQueue->pRear = pTask;
+    }
+    ++pTaskQueue->size;
+    return 0;
+}
+int taskDeQueue(taskQueue_t *pTaskQueue){ // 出队
+    task_t * pCur = pTaskQueue->pFront;
+    pTaskQueue->pFront = pCur->pNext;
+    free(pCur);
+    pTaskQueue->size--;
+    return 0;
+}
+
+// tcp.c
+// socket bind listen
+#include "threadPool.h"
+int tcpInit(int *pSockFd, char *ip, char *port){
+    *pSockFd = socket(AF_INET,SOCK_STREAM,0);
+    ERROR_CHECK(*pSockFd,-1,"socket");
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(atoi(port));
+    addr.sin_addr.s_addr = inet_addr(ip);
+    int reuse = 1;
+    int ret = setsockopt(*pSockFd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
+    ERROR_CHECK(ret,-1,"setsockopt");
+    ret = bind(*pSockFd,(struct sockaddr *)&addr,sizeof(addr));
+    ERROR_CHECK(ret,-1,"bind");
+    listen(*pSockFd,10);
+}
+
+// transFile.c
+#include "threadPool.h"
+int transFile(int netFd){
+    int fd = open("file1",O_RDWR);
+    ERROR_CHECK(fd,-1,"open"); 
+    train_t train;
+    train.length = 5;
+    strcpy(train.buf,"file1");
+    int ret = send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
+    struct stat statbuf;
+    ret = fstat(fd,&statbuf);
+    ERROR_CHECK(ret,-1,"fstat");
+    train.length = 4; // 车厢是4个字节 int
+    int fileSize = statbuf.st_size; // 长度转换成 int
+    memcpy(train.buf,&fileSize,sizeof(int)); // int 存入小火车
+    send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
+
+    sendfile(netFd,fd,NULL,fileSize);
+    train.length = 0;
+    ret = send(netFd,&train,sizeof(train.length) + train.length,MSG_NOSIGNAL);
+    close(fd);
+}
+
+// client.c
+#include <myself.h>
+typedef struct train_s{
+    int length;
+    char buf[1000];
+}train_t;
+int recvn(int sockFd,void *pstart,int len){
+    int total = 0;
+    int ret;
+    char *p = (char *)pstart;
+    while(total < len){
+        ret = recv(sockFd,p+total,len-total,0);
+        total += ret;
+    }
+    return 0;
+}
+int recvFile(int sockFd){
+    char name[1024] = {0};
+    int dataLength;
+    int ret = recvn(sockFd,&dataLength,sizeof(int));
+    ERROR_CHECK(ret,-1,"recv");
+    ret = recvn(sockFd,name,dataLength);
+    ERROR_CHECK(ret,-1,"recv");
+    int fd = open(name,O_RDWR|O_CREAT|O_TRUNC,0666);
+    ERROR_CHECK(fd,-1,"open");
+    int fileSize = 0;
+    recvn(sockFd,&dataLength,sizeof(int));
+    recvn(sockFd,&fileSize,dataLength);
+    printf("fileSize = %d\n",fileSize);
+    char buf[1000] = {0};
+    time_t timeBeg,timeEnd;
+    timeBeg = time(NULL);
+
+    int pipefds[2];
+    pipe(pipefds);
+    int total = 0;
+    while(total < fileSize){
+        int ret = splice(sockFd,NULL,pipefds[1],NULL,4096,SPLICE_F_MORE);
+        total += ret;
+        usleep(10000);
+        splice(pipefds[0],NULL,fd,NULL,ret,SPLICE_F_MORE);
+    }
+
+    recvn(sockFd,&dataLength,sizeof(int));
+    printf("dataLength = %d\n", dataLength);
+    timeEnd = time(NULL);
+    printf("total time = %ld\n",timeEnd - timeBeg);
+}
+int main(int argc, char *argv[]) {
+    // ./cilent 192.168.227.131 1234
+    ARGS_CHECK(argc,3);
+    int sockFd = socket(AF_INET,SOCK_STREAM,0);
+    ERROR_CHECK(sockFd,-1,"socket");
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(atoi(argv[2]));
+    addr.sin_addr.s_addr = inet_addr(argv[1]);
+    int ret = connect(sockFd,(struct sockaddr *)&addr,sizeof(addr));
+    ERROR_CHECK(ret,-1,"connect");
+    recvFile(sockFd);
+    close(sockFd);
+}
+```
