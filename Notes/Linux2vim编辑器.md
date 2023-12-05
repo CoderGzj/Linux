@@ -1,4 +1,4 @@
-# 4 VI / VIM 编辑器
+# VI / VIM 编辑器
 
 # 1 VI / VIM
 Unix操作系统和类Unix操作系统中最通用的文本编辑器
