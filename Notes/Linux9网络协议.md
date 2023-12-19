@@ -40,7 +40,7 @@ OSI网络模型有七层模型：分别是应用层、表示层、会话层、�
 ![](img/2023-10-11-20-19-03.png)
 
 ## 2.4 ifconfig
-ipconfig命令（Windows版本是ipconfig）可以展示本地网卡的信息，其中ens33（有些系统是使用eth0）是表示以太网网卡，而lo表示loopback本地回环设备。
+ifconfig命令（Windows版本是ipconfig）可以展示本地网卡的信息，其中ens33（有些系统是使用eth0）是表示以太网网卡，而lo表示loopback本地回环设备。
 
 ![](img/2023-10-11-20-21-42.png)
 
