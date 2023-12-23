@@ -41,7 +41,7 @@ uint16_t ntohs(uint16_t netshort);
 ```C
 #include <myself.h>
 int main(int argc, char *argv[]) {
-    // ./addr 192.168.14.9 1234
+    // ./addr 192.168.227.131 1234
     ARGS_CHECK(argc,3);
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
 ## 域名和IP地址的对应关系
 人类需要一个方便记忆的域名，去建立域名和IP地址的映射关系。
-一种方法是修改本机的 hosts文件/etc/osts 
+一种方法是修改本机的 hosts文件/etc/hosts 
 但是更加通用的方案是利用DNS协议，去访问一个DNS服务器，服务器当中存储了域名和IP地址的映射关系。
 
 与这个操作相关的函数是gethostbyname ，下面是其用法：
@@ -125,6 +125,7 @@ int main() {
 
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 调用connect 预期是完成TCP建立连接的三次握手。
+
 ![](img/2023-10-17-14-49-16.png)
 
 ```c
@@ -139,7 +140,7 @@ int main(int argc, char *argv[]) {
     addr.sin_family = AF_INET;
     addr.sin_port = htons(atoi(argv[2]));
     addr.sin_addr.s_addr = inet_addr(argv[1]);
-    //调用函数时，先去地址再强转
+    //调用函数时，先取地址再强转
     int ret = connect(socketFd,(struct sockaddr *)&addr,sizeof(addr));
     ERROR_CHECK(ret,-1,"connect");
     close(socketFd);
