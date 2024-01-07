@@ -585,6 +585,7 @@ void handleEvent(int pipeFd)
 不使用pthread_cancel ，而是让每个工作线程在事件循环开始的时候，检查一下线程池是否处于终止的状态，这样子线程就会等待当前任务执行完成了之后才会终止。
 
 ## 完整代码
+
 ```c
 // threadPool.h
 #include <myself.h>
