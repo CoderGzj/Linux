@@ -1,5 +1,6 @@
 #include "worker.h"
 #include "head.h"
+
 int exitPipe[2];
 int exitFlag;
 void sigFunc(int signum){
